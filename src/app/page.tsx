@@ -206,7 +206,7 @@ export default function Home() {
           href='#'
           className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
         >
-          Hopla.studio
+          Hopla<span className='text-[10px] font-normal'> studio</span>
         </a>
         <ul className='flex gap-8 list-none max-[900px]:hidden'>
           {[
