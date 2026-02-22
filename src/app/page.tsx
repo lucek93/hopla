@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { MoveUpRight } from "lucide-react";
 
 const PILLS = [
   "Inżynieryjna precyzja",
@@ -229,8 +230,54 @@ export default function Home() {
     hov: false,
     out: false,
   });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+
+  // Contact form state
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [formTopic, setFormTopic] = useState<string | null>(null);
+  const [formState, setFormState] = useState<
+    "idle" | "sending" | "success" | "error"
+  >("idle");
+
+  const openContactModal = useCallback(() => {
+    setContactModalOpen(true);
+    setFormState("idle");
+    setFormData({ name: "", email: "", message: "" });
+    setFormTopic(null);
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const closeContactModal = useCallback(() => {
+    setContactModalOpen(false);
+    document.body.style.overflow = "";
+  }, []);
+
+  const handleFormChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    },
+    [],
+  );
+
+  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormState("sending");
+    // Simulate sending — replace with real API call
+    await new Promise((r) => setTimeout(r, 1600));
+    setFormState("success");
+  }, []);
   const heroImgRef = useRef<HTMLDivElement>(null);
-  const archMagnetRef = useRef<HTMLAnchorElement>(null);
+  const archMagnetRef = useRef<HTMLButtonElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchCardN = useRef<number | null>(null);
+  const didSwipe = useRef(false);
+  const modalSwipeStartY = useRef<number | null>(null);
 
   // Collection state
   const [showAllItems, setShowAllItems] = useState(false);
@@ -246,11 +293,21 @@ export default function Home() {
       setModalImgIdx(startIdx);
       document.body.style.overflow = "hidden";
     },
-    [],
+    [setModalImgIdx],
   );
 
   const closeModal = useCallback(() => {
     setModalItem(null);
+    document.body.style.overflow = "";
+  }, []);
+
+  const openMobileMenu = useCallback(() => {
+    setMobileMenuOpen(true);
+    document.body.style.overflow = "hidden";
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
     document.body.style.overflow = "";
   }, []);
 
@@ -272,7 +329,7 @@ export default function Home() {
       const len = modalItem.images.length;
       setModalImgIdx((i) => (i + dir + len) % len);
     },
-    [modalItem],
+    [modalItem, setModalImgIdx],
   );
 
   // Detect mobile/touch
@@ -287,7 +344,10 @@ export default function Home() {
   // Close modal on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") {
+        closeModal();
+        closeContactModal();
+      }
       if (modalItem) {
         if (e.key === "ArrowRight") advanceModalImg(1);
         if (e.key === "ArrowLeft") advanceModalImg(-1);
@@ -295,7 +355,7 @@ export default function Home() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [closeModal, modalItem, advanceModalImg]);
+  }, [closeModal, closeContactModal, modalItem, advanceModalImg]);
 
   // Scroll progress bar + hero parallax
   useEffect(() => {
@@ -310,6 +370,7 @@ export default function Home() {
       if (heroImgRef.current && window.scrollY < window.innerHeight * 1.5) {
         heroImgRef.current.style.transform = `translateY(${window.scrollY * 0.12}px)`;
       }
+      setShowStickyBar(el.scrollTop > window.innerHeight * 0.55);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -407,36 +468,177 @@ export default function Home() {
         aria-hidden='true'
       />
       {/* NAV */}
-      <nav className='fixed inset-x-0 top-0 z-[200] h-16 flex items-center justify-between px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-6'>
-        <ul className='flex gap-8 list-none max-[900px]:hidden'>
-          {[
-            { href: "#kolekcja", label: "Kolekcja" },
-            { href: "#architekci", label: "Architekci" },
-            { href: "/o-marce", label: "O marce" },
-          ].map((link) => (
-            <li key={link.href}>
-              <Link
-                href={link.href}
-                className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916] hover:font-semibold'
-              >
-                {link.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-        <Link
-          href='/'
-          className='text-[15px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
-        >
-          Hopla<span className='text-[10px] font-normal'> studio</span>
-        </Link>
-        <Link
-          href='/#kontakt'
-          className='nav-cta text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[9px] px-5 no-underline'
-        >
-          Kontakt
-        </Link>
+      <nav className='fixed inset-x-0 top-0 z-[200] h-16 grid grid-cols-3 items-center px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-5'>
+        {/* LEFT — desktop links / mobile hamburger */}
+        <div className='flex items-center'>
+          {/* Desktop links */}
+          <ul className='flex gap-8 list-none max-[900px]:hidden'>
+            {[
+              { href: "#kolekcja", label: "Kolekcja" },
+              { href: "#architekci", label: "Architekci" },
+              { href: "/o-marce", label: "O marce" },
+            ].map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916] hover:font-semibold'
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+          {/* Mobile hamburger */}
+          <button
+            onClick={openMobileMenu}
+            className='hidden max-[900px]:flex flex-col justify-center gap-[5px] w-10 h-10 -ml-2 bg-transparent border-0 cursor-pointer p-2'
+            aria-label='Otwórz menu'
+          >
+            <span className='block w-5 h-[1.5px] bg-[#1a1916] transition-all duration-200' />
+            <span className='block w-3.5 h-[1.5px] bg-[#1a1916] transition-all duration-200' />
+          </button>
+        </div>
+
+        {/* CENTER — logo */}
+        <div className='flex justify-center'>
+          <Link
+            href='/'
+            className='text-[15px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
+          >
+            Hopla<span className='text-[10px] font-normal'> studio</span>
+          </Link>
+        </div>
+
+        {/* RIGHT — contact CTA */}
+        {isMobile ? null : (
+          <div className='flex justify-end'>
+            <button
+              onClick={openContactModal}
+              className='nav-cta text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[9px] px-5 cursor-pointer border-0 max-[480px]:py-[8px] max-[480px]:px-4'
+            >
+              Kontakt
+            </button>
+          </div>
+        )}
       </nav>
+
+      {/* MOBILE MENU OVERLAY */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key='mobile-backdrop'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className='fixed inset-0 z-[300] bg-[rgba(10,10,9,0.5)] backdrop-blur-[2px]'
+              onClick={closeMobileMenu}
+            />
+            {/* Drawer */}
+            <motion.div
+              key='mobile-drawer'
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className='fixed top-0 left-0 bottom-0 z-[400] w-[80vw] max-w-[320px] bg-[#f4f3f0] flex flex-col'
+            >
+              {/* Drawer header */}
+              <div className='flex items-center justify-between h-16 px-6 border-b border-[rgba(26,25,22,0.1)]'>
+                <Link
+                  href='/'
+                  onClick={closeMobileMenu}
+                  className='text-[15px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
+                >
+                  Hopla<span className='text-[10px] font-normal'> studio</span>
+                </Link>
+                <button
+                  onClick={closeMobileMenu}
+                  className='w-10 h-10 flex items-center justify-center text-[#6b6963] hover:text-[#1a1916] text-[22px] bg-transparent border-0 cursor-pointer -mr-2'
+                  aria-label='Zamknij menu'
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Drawer links */}
+              <nav className='flex flex-col flex-1 px-6 pt-8 pb-10 gap-0'>
+                {[
+                  { href: "#kolekcja", label: "Kolekcja", sub: "8 obiektów" },
+                  {
+                    href: "#architekci",
+                    label: "Architekci",
+                    sub: "Współpraca",
+                  },
+                  {
+                    href: "/o-marce",
+                    label: "O marce",
+                    sub: "Historia i filozofia",
+                  },
+                ].map((link, i) => (
+                  <motion.a
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeMobileMenu}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      delay: 0.12 + i * 0.07,
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className='flex items-center justify-between py-5 border-b border-[rgba(26,25,22,0.08)] no-underline group'
+                  >
+                    <div>
+                      <span className='block text-[18px] font-light tracking-[-0.02em] text-[#1a1916] group-hover:font-normal transition-all duration-200'>
+                        {link.label}
+                      </span>
+                      <span className='block text-[11px] font-normal tracking-[0.06em] text-[#b8b5b0] mt-0.5'>
+                        {link.sub}
+                      </span>
+                    </div>
+                    <span className='text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-1 transition-all duration-200'>
+                      →
+                    </span>
+                  </motion.a>
+                ))}
+
+                {/* Spacer */}
+                <div className='flex-1' />
+
+                {/* Bottom CTA */}
+                <motion.button
+                  onClick={() => {
+                    closeMobileMenu();
+                    openContactModal();
+                  }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: 0.36,
+                    duration: 0.5,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className='w-full inline-flex items-center justify-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-6 cursor-pointer border-0'
+                >
+                  Zapytaj o wycenę →
+                </motion.button>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.44, duration: 0.5 }}
+                  className='text-center text-[11px] text-[#b8b5b0] tracking-[0.04em] mt-5'
+                >
+                  hello@hopla.studio
+                </motion.p>
+              </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* HERO */}
       <section className='grid grid-cols-2 pt-16 h-[100svh] max-[900px]:grid-cols-1 max-[900px]:h-auto'>
@@ -465,7 +667,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <div className='relative overflow-hidden max-[900px]:h-[60vw] max-[480px]:h-[72vw]'>
+        <div className='relative overflow-hidden max-[900px]:h-[70vw] max-[480px]:h-[80vw]'>
           <div
             ref={heroImgRef}
             className='absolute inset-0 will-change-transform'
@@ -477,6 +679,12 @@ export default function Home() {
               className='object-cover object-center hero-img-zoom saturate-[0.75]'
               priority
             />
+          </div>
+          {/* Mobile scroll indicator */}
+          <div className='scroll-hint absolute bottom-5 left-1/2 hidden max-[900px]:flex items-center justify-center z-10'>
+            <div className='w-9 h-9 flex items-center justify-center bg-[rgba(244,243,240,0.82)] backdrop-blur-sm rounded-full text-[15px] text-[#1a1916] shadow-sm'>
+              ↓
+            </div>
           </div>
         </div>
       </section>
@@ -569,146 +777,192 @@ export default function Home() {
 
       {/* COLLECTION */}
       <section className='border-b border-[rgba(26,25,22,0.1)]' id='kolekcja'>
-        <div className='flex items-baseline justify-between px-10 pt-12 pb-8 border-b border-[rgba(26,25,22,0.1)]'>
+        <div className='flex items-baseline justify-between px-10 max-[900px]:px-5 pt-12 pb-8 border-b border-[rgba(26,25,22,0.1)]'>
           <span className='text-[11px] font-medium tracking-[0.14em] uppercase text-[#1a1916]'>
             Kolekcja
           </span>
-          <span className='text-[12px] font-normal text-[#b8b5b0]'>
-            {COLLECTION.length} obiektów dostępnych
-          </span>
+          <div className='flex items-center gap-3'>
+            <span className='hidden max-[900px]:flex items-center gap-1 text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
+              przesuwaj <span className='opacity-60'>→</span>
+            </span>
+            <span className='text-[12px] font-normal text-[#b8b5b0] max-[900px]:hidden'>
+              {COLLECTION.length} obiektów
+            </span>
+          </div>
         </div>
 
-        <motion.div
-          className='grid grid-cols-4 max-[900px]:grid-cols-2 max-[480px]:grid-cols-1'
-          layout
-        >
-          <AnimatePresence initial={false}>
-            {(showAllItems ? COLLECTION : COLLECTION.slice(0, 4)).map(
-              (item) => {
-                const { n, name, cat, images } = item;
-                const imgIdx = cardImgIdx[n] ?? 0;
-                return (
-                  <motion.div
-                    key={n}
-                    layout
-                    initial={{ opacity: 0, y: 32 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 16 }}
-                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                    className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:[&:nth-child(2n)]:border-r-0 max-[480px]:border-r-0 relative overflow-hidden'
-                  >
-                    {/* Image zone — click to open modal */}
-                    <button
-                      className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
-                      onClick={() => openModal(item, imgIdx)}
-                      aria-label={`Otwórz galerię: ${name}`}
+        <div className='coll-carousel-wrap max-[900px]:relative'>
+          <motion.div
+            className='grid grid-cols-4 max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:snap-x max-[900px]:snap-mandatory mobile-carousel coll-carousel-track'
+            layout
+          >
+            <AnimatePresence initial={false}>
+              {(showAllItems ? COLLECTION : COLLECTION.slice(0, 4)).map(
+                (item) => {
+                  const { n, name, cat, images } = item;
+                  const imgIdx = cardImgIdx[n] ?? 0;
+                  return (
+                    <motion.div
+                      key={n}
+                      layout
+                      initial={{ opacity: 0, y: 32 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 16 }}
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[78vw] max-[900px]:snap-start relative overflow-hidden'
                     >
-                      <div className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'>
-                        {/* Number overlay */}
-                        <span
-                          className='coll-num-overlay z-50'
-                          aria-hidden='true'
+                      {/* Image zone — click to open modal */}
+                      <button
+                        className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
+                        onClick={() => {
+                          if (didSwipe.current) {
+                            didSwipe.current = false;
+                            return;
+                          }
+                          openModal(item, imgIdx);
+                        }}
+                        aria-label={`Otwórz galerię: ${name}`}
+                      >
+                        <div
+                          className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'
+                          onTouchStart={(e) => {
+                            touchStartX.current = e.touches[0].clientX;
+                            touchCardN.current = n;
+                            didSwipe.current = false;
+                          }}
+                          onTouchEnd={(e) => {
+                            if (
+                              touchStartX.current === null ||
+                              touchCardN.current !== n
+                            )
+                              return;
+                            const dx =
+                              e.changedTouches[0].clientX - touchStartX.current;
+                            touchStartX.current = null;
+                            if (Math.abs(dx) > 40 && images.length > 1) {
+                              didSwipe.current = true;
+                              const dir = dx < 0 ? 1 : -1;
+                              setCardImgIdx((prev) => ({
+                                ...prev,
+                                [n]:
+                                  ((prev[n] ?? 0) + dir + images.length) %
+                                  images.length,
+                              }));
+                            }
+                          }}
                         >
-                          {String(n).padStart(2, "0")}
-                        </span>
-
-                        {/* Image with crossfade */}
-                        <AnimatePresence mode='wait'>
-                          <motion.div
-                            key={imgIdx}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.4 }}
-                            className='absolute inset-0'
-                          >
-                            <Image
-                              src={images[imgIdx]}
-                              alt={`${name} — zdjęcie ${imgIdx + 1}`}
-                              fill
-                              className='coll-img-inner'
-                            />
-                          </motion.div>
-                        </AnimatePresence>
-
-                        {/* Gallery dot indicators — always visible on mobile */}
-                        {images.length > 1 && (
-                          <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-300'>
-                            {images.map((_, di) => (
-                              <span
-                                key={di}
-                                className={`block w-1 h-1 rounded-full transition-all duration-300 ${di === imgIdx ? "bg-[#1a1916] scale-125" : "bg-[rgba(26,25,22,0.3)]"}`}
-                              />
-                            ))}
-                          </div>
-                        )}
-
-                        {/* View overlay — visible on hover (desktop) or always subtle on mobile */}
-                        <div className='absolute inset-0 flex items-end justify-end pb-3 pr-3 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10'>
-                          <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hidden max-[900px]:hidden'>
-                            Zobacz obiekt
-                          </span>
-                          {/* Mobile tap hint icon */}
+                          {/* Number overlay */}
                           <span
-                            className='hidden max-[900px]:flex items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] text-[13px] rounded-full'
+                            className='coll-num-overlay z-50'
                             aria-hidden='true'
                           >
-                            ↗
+                            {String(n).padStart(2, "0")}
                           </span>
+
+                          {/* Image with crossfade */}
+                          <AnimatePresence mode='wait'>
+                            <motion.div
+                              key={imgIdx}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              transition={{ duration: 0.5 }}
+                              className='absolute inset-0'
+                            >
+                              <Image
+                                src={images[imgIdx]}
+                                alt={`${name} — zdjęcie ${imgIdx + 1}`}
+                                fill
+                                className='coll-img-inner'
+                              />
+                            </motion.div>
+                          </AnimatePresence>
+
+                          {/* Gallery dot indicators — always visible on mobile */}
+                          {images.length > 1 && (
+                            <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-500'>
+                              {images.map((_, di) => (
+                                <span
+                                  key={di}
+                                  className={`block w-1 h-1 rounded-full transition-all duration-300 ${di === imgIdx ? "bg-[#1a1916] scale-125" : "bg-[rgba(26,25,22,0.3)]"}`}
+                                />
+                              ))}
+                            </div>
+                          )}
+
+                          {/* View overlay — visible on hover (desktop) or always subtle on mobile */}
+                          <div className='absolute inset-0 flex items-end justify-end pb-3 pr-3 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10'>
+                            <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hidden max-[900px]:hidden'>
+                              Zobacz obiekt
+                            </span>
+                            {/* Mobile tap hint icon */}
+                            <span
+                              className='hidden max-[900px]:flex items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] text-[13px] rounded-full'
+                              aria-hidden='true'
+                            >
+                              {/* ↗ */}
+                              <MoveUpRight className='w-3 h-3' />
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+
+                      {/* Card footer with arrow nav */}
+                      <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-3 max-[900px]:pb-4 border-t border-[rgba(26,25,22,0.1)]'>
+                        <div>
+                          <p className='text-[13px] max-[900px]:text-[12px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
+                            {name}
+                          </p>
+                          <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
+                            {cat}
+                          </p>
+                        </div>
+                        <div className='flex items-center gap-1.5'>
+                          {/* Image nav — hover on desktop, always visible on mobile */}
+                          {images.length > 1 && (
+                            <div className='flex gap-1 opacity-0 group-hover:opacity-100 max-[900px]:hidden transition-opacity duration-300'>
+                              <button
+                                onClick={(e) =>
+                                  advanceCardImg(e, n, -1, images.length)
+                                }
+                                className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                                aria-label='Poprzednie zdjęcie'
+                              >
+                                ←
+                              </button>
+                              <button
+                                onClick={(e) =>
+                                  advanceCardImg(e, n, 1, images.length)
+                                }
+                                className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                                aria-label='Następne zdjęcie'
+                              >
+                                →
+                              </button>
+                            </div>
+                          )}
+                          {/* Desktop: diagonal arrow. Hidden on mobile (image tap opens modal) */}
+                          <button
+                            onClick={() => openModal(item, imgIdx)}
+                            className='coll-arrow max-[900px]:hidden text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-[3px] group-hover:translate-y-[-3px] transition-all duration-200 bg-transparent border-0 cursor-pointer px-1'
+                            aria-label={`Otwórz ${name}`}
+                          >
+                            ↗
+                          </button>
                         </div>
                       </div>
-                    </button>
-
-                    {/* Card footer with arrow nav */}
-                    <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-3 max-[900px]:pb-4 border-t border-[rgba(26,25,22,0.1)]'>
-                      <div>
-                        <p className='text-[13px] max-[900px]:text-[12px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
-                          {name}
-                        </p>
-                        <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
-                          {cat}
-                        </p>
-                      </div>
-                      <div className='flex items-center gap-1.5'>
-                        {/* Image nav — hover on desktop, always visible on mobile */}
-                        {images.length > 1 && (
-                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-300'>
-                            <button
-                              onClick={(e) =>
-                                advanceCardImg(e, n, -1, images.length)
-                              }
-                              className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
-                              aria-label='Poprzednie zdjęcie'
-                            >
-                              ←
-                            </button>
-                            <button
-                              onClick={(e) =>
-                                advanceCardImg(e, n, 1, images.length)
-                              }
-                              className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
-                              aria-label='Następne zdjęcie'
-                            >
-                              →
-                            </button>
-                          </div>
-                        )}
-                        {/* Desktop: diagonal arrow. Hidden on mobile (image tap opens modal) */}
-                        <button
-                          onClick={() => openModal(item, imgIdx)}
-                          className='coll-arrow max-[900px]:hidden text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-[3px] group-hover:translate-y-[-3px] transition-all duration-200 bg-transparent border-0 cursor-pointer px-1'
-                          aria-label={`Otwórz ${name}`}
-                        >
-                          ↗
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              },
-            )}
-          </AnimatePresence>
-        </motion.div>
+                    </motion.div>
+                  );
+                },
+              )}
+            </AnimatePresence>
+            {/* Carousel trailing spacer – peek effect */}
+            <div
+              className='hidden max-[900px]:block flex-none w-[6vw] shrink-0'
+              aria-hidden='true'
+            />
+          </motion.div>
+        </div>
 
         {/* SHOW MORE / LESS */}
         <div className='flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
@@ -740,7 +994,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
             className='fixed inset-0 z-[500] flex items-stretch max-[900px]:flex-col max-[900px]:justify-end bg-[rgba(10,10,9,0.82)] backdrop-blur-[6px]'
             onClick={closeModal}
           >
@@ -755,7 +1009,21 @@ export default function Home() {
               transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
               className='modal-panel ml-auto flex w-full max-w-[1080px] bg-[#f4f3f0] overflow-hidden max-[900px]:flex-col max-[900px]:max-w-full max-[900px]:mt-auto max-[900px]:max-h-[92dvh] max-[900px]:overflow-y-auto'
               onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => {
+                modalSwipeStartY.current = e.touches[0].clientY;
+              }}
+              onTouchEnd={(e) => {
+                if (modalSwipeStartY.current === null) return;
+                const dy =
+                  e.changedTouches[0].clientY - modalSwipeStartY.current;
+                modalSwipeStartY.current = null;
+                if (dy > 72) closeModal();
+              }}
             >
+              {/* Mobile drag handle */}
+              <div className='hidden max-[900px]:block bg-[#f4f3f0] pt-1 pb-0 shrink-0'>
+                <div className='modal-drag-handle' aria-hidden='true' />
+              </div>
               {/* LEFT — image gallery */}
               <div className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:flex-none max-[900px]:min-h-0 max-[900px]:h-[58vw]'>
                 <AnimatePresence mode='wait'>
@@ -814,7 +1082,7 @@ export default function Home() {
                     <button
                       key={`dot-${ti}`}
                       onClick={() => setModalImgIdx(ti)}
-                      className={`hidden max-[900px]:block w-6 h-6 flex items-center justify-center`}
+                      className={`hidden max-[900px]:flex w-6 h-6 items-center justify-center`}
                       aria-label={`Zdjęcie ${ti + 1}`}
                     >
                       <span
@@ -882,13 +1150,15 @@ export default function Home() {
 
                 {/* CTA */}
                 <div className='px-6 max-[900px]:px-5 pb-6 max-[900px]:pb-8'>
-                  <a
-                    href='#kontakt'
-                    onClick={closeModal}
-                    className='modal-cta w-full inline-flex items-center justify-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-6 no-underline transition-opacity duration-200 hover:opacity-80'
+                  <button
+                    onClick={() => {
+                      closeModal();
+                      openContactModal();
+                    }}
+                    className='modal-cta w-full inline-flex items-center justify-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-6 cursor-pointer border-0 transition-opacity duration-200 hover:opacity-80'
                   >
                     Zapytaj o wycenę →
-                  </a>
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -897,11 +1167,11 @@ export default function Home() {
       </AnimatePresence>
 
       {/* PRINCIPLES STRIP */}
-      <section className='grid grid-cols-5 border-b border-[rgba(26,25,22,0.1)] bg-[#f4f3f0] max-[900px]:grid-cols-2 max-[480px]:grid-cols-1 max-[900px]:overflow-hidden'>
+      <section className='grid grid-cols-5 border-b border-[rgba(26,25,22,0.1)] bg-[#f4f3f0] max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:snap-x max-[900px]:snap-mandatory mobile-carousel'>
         {PRINCIPLES.map(({ num, name, desc }, i) => (
           <div
             key={num}
-            className={`value-card sr pr-item px-7 max-[900px]:px-6 py-10 max-[900px]:py-8 border-r border-[rgba(26,25,22,0.1)] cursor-default${i === 4 ? " max-[900px]:col-span-2 max-[480px]:col-span-1 max-[900px]:border-r-0" : ""}`}
+            className={`value-card sr pr-item px-7 max-[900px]:px-7 py-10 max-[900px]:py-10 border-r border-[rgba(26,25,22,0.1)] cursor-default max-[900px]:flex-none max-[900px]:w-[78vw] max-[900px]:snap-start max-[900px]:shrink-0${i === 4 ? " max-[900px]:border-r-0" : ""}`}
           >
             <span className='vc-num text-[11px] font-normal text-[#b8b5b0] tracking-[0.1em] mb-5 block'>
               {num}
@@ -959,12 +1229,12 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <a
-            href='#kontakt'
-            className='mat-cta sr inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[14px] px-6 no-underline self-start mt-10'
+          <button
+            onClick={openContactModal}
+            className='mat-cta sr inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[14px] px-6 self-start mt-10 cursor-pointer border-0'
           >
             Zapytaj o materiał →
-          </a>
+          </button>
         </div>
       </section>
 
@@ -986,15 +1256,17 @@ export default function Home() {
               współpracę przy projektach wymagających niestandartowych rozwiązań
               stalowych.
             </p>
-            <a
-              ref={archMagnetRef}
-              href='#kontakt'
-              className='magnetic-btn arch-btn inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.1em] uppercase text-[rgba(244,243,240,0.9)] no-underline border-b border-[rgba(244,243,240,0.3)] pb-1 w-fit max-[900px]:!transform-none'
-              onMouseMove={handleArchMagnet}
+            <button
+              ref={archMagnetRef as React.RefObject<HTMLButtonElement>}
+              onClick={openContactModal}
+              className='magnetic-btn arch-btn inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.1em] uppercase text-[rgba(244,243,240,0.9)] border-b border-[rgba(244,243,240,0.3)] pb-1 w-fit max-[900px]:!transform-none bg-transparent border-l-0 border-r-0 border-t-0 cursor-pointer'
+              onMouseMove={
+                handleArchMagnet as unknown as React.MouseEventHandler<HTMLButtonElement>
+              }
               onMouseLeave={handleArchMagnetLeave}
             >
               Skontaktuj się w sprawie specyfikacji →
-            </a>
+            </button>
           </div>
         </div>
         <div className='relative overflow-hidden max-[900px]:h-[50vw]'>
@@ -1007,9 +1279,306 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CONTACT MODAL */}
+      <AnimatePresence>
+        {contactModalOpen && (
+          <motion.div
+            key='contact-backdrop'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className='fixed inset-0 z-[600] flex items-end justify-center max-[900px]:items-end min-[901px]:items-center bg-[rgba(10,10,9,0.75)] backdrop-blur-[8px]'
+            onClick={closeContactModal}
+          >
+            <motion.div
+              key='contact-panel'
+              initial={{ opacity: 0, y: 40, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 24, scale: 0.98 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className='relative w-full max-w-[960px] max-h-[96dvh] flex max-[900px]:flex-col min-[901px]:flex-row overflow-hidden bg-[#f4f3f0] max-[900px]:rounded-t-2xl min-[901px]:rounded-none'
+              onClick={(e) => e.stopPropagation()}
+              onTouchStart={(e) => {
+                modalSwipeStartY.current = e.touches[0].clientY;
+              }}
+              onTouchEnd={(e) => {
+                if (modalSwipeStartY.current === null) return;
+                const dy =
+                  e.changedTouches[0].clientY - modalSwipeStartY.current;
+                modalSwipeStartY.current = null;
+                if (dy > 72) closeContactModal();
+              }}
+            >
+              {/* Mobile drag handle */}
+              <div className='hidden max-[900px]:flex absolute top-0 left-0 right-0 z-10 justify-center pt-2.5'>
+                <div className='modal-drag-handle mx-auto' />
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={closeContactModal}
+                className='absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center text-[20px] text-[#6b6963] hover:text-[#1a1916] hover:bg-[rgba(26,25,22,0.06)] transition-all duration-200 bg-transparent border-0 cursor-pointer rounded-sm'
+                aria-label='Zamknij'
+              >
+                ×
+              </button>
+
+              {/* LEFT — dark info panel */}
+              <div className='bg-[#1a1916] flex flex-col justify-between px-10 py-12 max-[900px]:px-6 max-[900px]:py-10 max-[900px]:pt-14 min-[901px]:w-[300px] min-[901px]:shrink-0'>
+                <div>
+                  <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[rgba(244,243,240,0.3)] mb-8'>
+                    Kontakt
+                  </p>
+                  <h2 className='text-[clamp(22px,2.8vw,36px)] font-light leading-[1.12] tracking-[-0.03em] text-[rgba(244,243,240,0.92)] mb-4'>
+                    Zacznijmy tworzyć razem.
+                  </h2>
+                  <p className='text-[13px] font-normal leading-[1.75] text-[rgba(244,243,240,0.4)] max-[900px]:hidden'>
+                    Opisz projekt — odpiszemy w ciągu 24h z wyceną.
+                  </p>
+                </div>
+                <div className='mt-8 space-y-1 max-[900px]:hidden'>
+                  {[
+                    {
+                      label: "Email",
+                      value: "hello@hopla.studio",
+                      href: "mailto:hello@hopla.studio",
+                    },
+                    { label: "Instagram", value: "@hopla.studio", href: "#" },
+                    {
+                      label: "Lokalizacja",
+                      value: "Warszawa, Polska",
+                      href: null,
+                    },
+                  ].map(({ label, value, href }) => (
+                    <div
+                      key={label}
+                      className='flex justify-between items-center py-3 border-b border-[rgba(244,243,240,0.07)]'
+                    >
+                      <span className='text-[10px] tracking-[0.12em] uppercase text-[rgba(244,243,240,0.28)]'>
+                        {label}
+                      </span>
+                      {href ? (
+                        <a
+                          href={href}
+                          className='text-[12px] text-[rgba(244,243,240,0.6)] no-underline hover:text-[rgba(244,243,240,0.9)] transition-colors duration-150 flex items-center gap-1.5 group'
+                        >
+                          {" "}
+                          <MoveUpRight className='w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity' />
+                          {value}
+                        </a>
+                      ) : (
+                        <span className='text-[12px] text-[rgba(244,243,240,0.6)]'>
+                          {value}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* RIGHT — form */}
+              <div className='flex-1 overflow-y-auto bg-[#fafaf8] px-10 py-12 max-[900px]:px-6 max-[900px]:py-8'>
+                <AnimatePresence mode='wait'>
+                  {formState === "success" ? (
+                    <motion.div
+                      key='success'
+                      initial={{ opacity: 0, scale: 0.96 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                      className='flex flex-col items-center justify-center text-center py-16 gap-6 h-full'
+                    >
+                      <motion.div
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{
+                          delay: 0.1,
+                          duration: 0.6,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className='w-16 h-16 rounded-full bg-[#1a1916] flex items-center justify-center'
+                      >
+                        <motion.svg
+                          width='24'
+                          height='24'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='#f4f3f0'
+                          strokeWidth='2'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <motion.polyline
+                            points='20 6 9 17 4 12'
+                            initial={{ pathLength: 0 }}
+                            animate={{ pathLength: 1 }}
+                            transition={{
+                              delay: 0.4,
+                              duration: 0.5,
+                              ease: "easeOut",
+                            }}
+                          />
+                        </motion.svg>
+                      </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5, duration: 0.4 }}
+                      >
+                        <p className='text-[22px] font-light tracking-[-0.02em] text-[#1a1916] mb-2'>
+                          Wiadomość wysłana
+                        </p>
+                        <p className='text-[13px] font-normal leading-[1.7] text-[#6b6963]'>
+                          Odpiszemy w ciągu 24 godzin.
+                        </p>
+                      </motion.div>
+                      <motion.button
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.7, duration: 0.3 }}
+                        onClick={closeContactModal}
+                        className='text-[11px] font-medium tracking-[0.1em] uppercase text-[#b8b5b0] hover:text-[#1a1916] transition-colors duration-200 mt-1 bg-transparent border-0 cursor-pointer'
+                      >
+                        Zamknij →
+                      </motion.button>
+                    </motion.div>
+                  ) : (
+                    <motion.form
+                      key='form'
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      onSubmit={handleFormSubmit}
+                      className='flex flex-col gap-7'
+                    >
+                      <div>
+                        <p className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-3'>
+                          Temat zapytania
+                        </p>
+                        <div className='flex flex-wrap gap-2'>
+                          {[
+                            "Mebel na wymiar",
+                            "Projekt architektoniczny",
+                            "Współpraca",
+                            "Inne",
+                          ].map((topic) => (
+                            <button
+                              key={topic}
+                              type='button'
+                              onClick={() =>
+                                setFormTopic((t) =>
+                                  t === topic ? null : topic,
+                                )
+                              }
+                              className={`contact-topic-pill text-[11px] font-normal tracking-[0.08em] px-4 py-2 border transition-all duration-200 ${
+                                formTopic === topic
+                                  ? "bg-[#1a1916] text-[#f4f3f0] border-[#1a1916]"
+                                  : "bg-transparent text-[#6b6963] border-[rgba(26,25,22,0.15)] hover:border-[#1a1916] hover:text-[#1a1916]"
+                              }`}
+                            >
+                              {topic}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className='grid grid-cols-2 gap-6 max-[480px]:grid-cols-1'>
+                        <div className='contact-field-wrap'>
+                          <input
+                            type='text'
+                            name='name'
+                            id='cm-name'
+                            placeholder=' '
+                            required
+                            value={formData.name}
+                            onChange={handleFormChange}
+                            className='contact-field peer'
+                          />
+                          <label htmlFor='cm-name' className='contact-label'>
+                            Imię i nazwisko
+                          </label>
+                        </div>
+                        <div className='contact-field-wrap'>
+                          <input
+                            type='email'
+                            name='email'
+                            id='cm-email'
+                            placeholder=' '
+                            required
+                            value={formData.email}
+                            onChange={handleFormChange}
+                            className='contact-field peer'
+                          />
+                          <label htmlFor='cm-email' className='contact-label'>
+                            Adres email
+                          </label>
+                        </div>
+                      </div>
+
+                      <div className='contact-field-wrap'>
+                        <textarea
+                          name='message'
+                          id='cm-message'
+                          placeholder=' '
+                          required
+                          rows={4}
+                          value={formData.message}
+                          onChange={handleFormChange}
+                          className='contact-field peer resize-none'
+                        />
+                        <label htmlFor='cm-message' className='contact-label'>
+                          Opisz projekt
+                        </label>
+                      </div>
+
+                      <div className='flex items-center justify-between gap-4 max-[480px]:flex-col max-[480px]:items-start'>
+                        <p className='text-[11px] font-normal leading-[1.6] text-[#b8b5b0] max-w-[220px] max-[480px]:max-w-none'>
+                          Dane używane wyłącznie do kontaktu w sprawie projektu.
+                        </p>
+                        <button
+                          type='submit'
+                          disabled={formState === "sending"}
+                          className='contact-submit shrink-0 relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-8 overflow-hidden disabled:opacity-70 transition-opacity duration-200 max-[480px]:w-full max-[480px]:justify-center'
+                        >
+                          <AnimatePresence mode='wait'>
+                            {formState === "sending" ? (
+                              <motion.span
+                                key='sending'
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                                className='flex items-center gap-2'
+                              >
+                                <span className='contact-spinner' />
+                                Wysyłanie…
+                              </motion.span>
+                            ) : (
+                              <motion.span
+                                key='idle'
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -8 }}
+                              >
+                                Wyślij wiadomość →
+                              </motion.span>
+                            )}
+                          </AnimatePresence>
+                        </button>
+                      </div>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* FOOTER */}
       <footer
-        className='pt-16 px-10 pb-10 bg-[#f4f3f0] max-[900px]:px-6 max-[900px]:pt-12 max-[900px]:pb-8'
+        className='pt-16 px-10 pb-10 bg-[#f4f3f0] max-[900px]:px-6 max-[900px]:pt-12 max-[900px]:pb-32'
         id='kontakt'
       >
         <div className='grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-12 pb-14 border-b border-[rgba(26,25,22,0.1)] mb-8 max-[900px]:grid-cols-2 max-[480px]:grid-cols-1 max-[900px]:gap-8'>
@@ -1054,6 +1623,36 @@ export default function Home() {
           </span>
         </div>
       </footer>
+      {/* MOBILE STICKY CTA BAR */}
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            key='sticky-bar'
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 80, opacity: 0 }}
+            transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+            className='fixed bottom-0 inset-x-0 z-[150] hidden max-[900px]:flex flex-col mobile-sticky-bar'
+          >
+            <div className='bg-[rgba(244,243,240,0.96)] backdrop-blur-[16px] border-t border-[rgba(26,25,22,0.12)] px-5 py-3.5 flex items-center gap-4'>
+              <div className='flex-1 min-w-0'>
+                <p className='text-[10px] font-medium tracking-[0.12em] uppercase text-[#b8b5b0] mb-0.5'>
+                  Hopla Studio
+                </p>
+                <p className='text-[12px] font-light tracking-[-0.01em] text-[#1a1916] truncate'>
+                  Meble stalowe na wymiar
+                </p>
+              </div>
+              <button
+                onClick={openContactModal}
+                className='touch-press shrink-0 inline-flex items-center gap-2 text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-3 px-5 border-0 cursor-pointer active:opacity-70 transition-opacity duration-100'
+              >
+                Kontakt →
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

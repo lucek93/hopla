@@ -316,7 +316,7 @@ body {
     color 0.4s ease,
     transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
   transform: translateY(6px);
-  select: none;
+  user-select: none;
 }
 .coll-item:hover .coll-num-overlay {
   color: rgba(26, 25, 22, 0.8);
@@ -470,5 +470,189 @@ a {
 @media (max-width: 900px) {
   .modal-panel {
     border-radius: 16px 16px 0 0;
+  }
+}
+
+/* ── MOBILE CAROUSEL – hide scrollbar ── */
+.mobile-carousel {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.mobile-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── SCROLL DOWN INDICATOR ── */
+@keyframes scroll-bounce {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+    opacity: 0.8;
+  }
+  55% {
+    transform: translateX(-50%) translateY(8px);
+    opacity: 1;
+  }
+}
+.scroll-hint {
+  animation: scroll-bounce 2.3s ease-in-out infinite;
+}
+
+/* ── ACTIVE PRESS FEEDBACK (touch only) ── */
+@media (pointer: coarse) {
+  .touch-press:active {
+    opacity: 0.68;
+    transform: scale(0.96);
+    transition:
+      transform 0.07s ease,
+      opacity 0.07s ease;
+  }
+}
+
+/* ── CONTACT FORM — FLOATING LABELS ── */
+.contact-field-wrap {
+  position: relative;
+}
+
+.contact-field {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid rgba(26, 25, 22, 0.15);
+  padding: 20px 0 8px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 400;
+  color: #1a1916;
+  outline: none;
+  transition: border-color 0.25s;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0;
+}
+
+.contact-field:focus {
+  border-bottom-color: #1a1916;
+}
+
+.contact-label {
+  position: absolute;
+  top: 20px;
+  left: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: #b8b5b0;
+  pointer-events: none;
+  transition:
+    top 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    font-size 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.22s;
+  letter-spacing: 0.01em;
+}
+
+/* Float label when input is focused or has content */
+.contact-field:not(:placeholder-shown) ~ .contact-label,
+.contact-field:focus ~ .contact-label {
+  top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6b6963;
+}
+
+.contact-field:focus ~ .contact-label {
+  color: #1a1916;
+}
+
+/* ── CONTACT SUBMIT BUTTON ── */
+.contact-submit {
+  cursor: pointer;
+  border: none;
+  position: relative;
+  overflow: hidden;
+}
+.contact-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(244, 243, 240, 0.1);
+  transform: translateX(-101%);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.contact-submit:not(:disabled):hover::before {
+  transform: translateX(0);
+}
+
+/* ── CONTACT SPINNER ── */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.contact-spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid rgba(244, 243, 240, 0.35);
+  border-top-color: #f4f3f0;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* ── TOPIC PILL ACTIVE STATE ── */
+.contact-topic-pill {
+  cursor: pointer;
+}
+
+/* ── MOBILE CONTACT TWEAKS ── */
+@media (max-width: 480px) {
+  .contact-field {
+    font-size: 16px; /* prevent iOS zoom on focus */
+  }
+}
+@media (max-width: 900px) {
+  .coll-carousel-track .coll-item {
+    border-right: 1px solid rgba(26, 25, 22, 0.1) !important;
+  }
+  .coll-carousel-track .coll-item:last-child {
+    border-right: none !important;
+  }
+}
+
+/* ── MODAL DRAG HANDLE ── */
+.modal-drag-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(26, 25, 22, 0.18);
+  border-radius: 2px;
+  margin: 12px auto 8px;
+  flex-shrink: 0;
+}
+
+/* ── STICKY MOBILE CTA ── */
+.mobile-sticky-bar {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ── COLLECTION CAROUSEL SWIPE HINT FADE ── */
+@media (max-width: 900px) {
+  .coll-carousel-wrap {
+    position: relative;
+  }
+  .coll-carousel-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(244, 243, 240, 0.55)
+    );
+    pointer-events: none;
+    z-index: 5;
   }
 }
