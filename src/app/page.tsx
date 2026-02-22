@@ -275,6 +275,15 @@ export default function Home() {
     [modalItem],
   );
 
+  // Detect mobile/touch
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 900);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
   // Close modal on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -444,8 +453,8 @@ export default function Home() {
               geometrię
             </span>
           </h1>
-          <div className='hero-bottom flex justify-between items-end'>
-            <p className='text-[13px] font-normal leading-[1.7] text-[#6b6963] max-w-[260px]'>
+          <div className='hero-bottom flex justify-between items-end max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-5'>
+            <p className='text-[13px] font-normal leading-[1.7] text-[#6b6963] max-w-[260px] max-[480px]:max-w-none'>
               Meble stalowe zaprojektowane z architektoniczną klarownością.
             </p>
             <a
@@ -456,7 +465,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-        <div className='relative overflow-hidden max-[900px]:h-[55vw]'>
+        <div className='relative overflow-hidden max-[900px]:h-[60vw] max-[480px]:h-[72vw]'>
           <div
             ref={heroImgRef}
             className='absolute inset-0 will-change-transform'
@@ -569,7 +578,10 @@ export default function Home() {
           </span>
         </div>
 
-        <motion.div className='grid grid-cols-4 max-[900px]:grid-cols-2' layout>
+        <motion.div
+          className='grid grid-cols-4 max-[900px]:grid-cols-2 max-[480px]:grid-cols-1'
+          layout
+        >
           <AnimatePresence initial={false}>
             {(showAllItems ? COLLECTION : COLLECTION.slice(0, 4)).map(
               (item) => {
@@ -583,7 +595,7 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 16 }}
                     transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                    className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:[&:nth-child(2n)]:border-r-0 relative overflow-hidden'
+                    className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:[&:nth-child(2n)]:border-r-0 max-[480px]:border-r-0 relative overflow-hidden'
                   >
                     {/* Image zone — click to open modal */}
                     <button
@@ -619,9 +631,9 @@ export default function Home() {
                           </motion.div>
                         </AnimatePresence>
 
-                        {/* Gallery dot indicators */}
+                        {/* Gallery dot indicators — always visible on mobile */}
                         {images.length > 1 && (
-                          <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                          <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-300'>
                             {images.map((_, di) => (
                               <span
                                 key={di}
@@ -631,33 +643,41 @@ export default function Home() {
                           </div>
                         )}
 
-                        {/* View overlay */}
-                        <div className='absolute inset-0 flex items-center justify-center bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] transition-colors duration-400 z-10'>
-                          <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300'>
+                        {/* View overlay — visible on hover (desktop) or always subtle on mobile */}
+                        <div className='absolute inset-0 flex items-end justify-end pb-3 pr-3 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10'>
+                          <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hidden max-[900px]:hidden'>
                             Zobacz obiekt
+                          </span>
+                          {/* Mobile tap hint icon */}
+                          <span
+                            className='hidden max-[900px]:flex items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] text-[13px] rounded-full'
+                            aria-hidden='true'
+                          >
+                            ↗
                           </span>
                         </div>
                       </div>
                     </button>
 
                     {/* Card footer with arrow nav */}
-                    <div className='flex justify-between items-end px-6 pt-5 pb-7 border-t border-[rgba(26,25,22,0.1)]'>
+                    <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-3 max-[900px]:pb-4 border-t border-[rgba(26,25,22,0.1)]'>
                       <div>
-                        <p className='text-[14px] font-normal tracking-[-0.01em] text-[#1a1916] mb-1'>
+                        <p className='text-[13px] max-[900px]:text-[12px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
                           {name}
                         </p>
                         <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
                           {cat}
                         </p>
                       </div>
-                      <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-1.5'>
+                        {/* Image nav — hover on desktop, always visible on mobile */}
                         {images.length > 1 && (
-                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-300'>
                             <button
                               onClick={(e) =>
                                 advanceCardImg(e, n, -1, images.length)
                               }
-                              className='coll-nav-btn w-7 h-7 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                              className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
                               aria-label='Poprzednie zdjęcie'
                             >
                               ←
@@ -666,16 +686,17 @@ export default function Home() {
                               onClick={(e) =>
                                 advanceCardImg(e, n, 1, images.length)
                               }
-                              className='coll-nav-btn w-7 h-7 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                              className='coll-nav-btn w-8 h-8 max-[900px]:w-9 max-[900px]:h-9 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] active:bg-[#1a1916] active:text-[#f4f3f0] transition-all duration-200 text-[11px]'
                               aria-label='Następne zdjęcie'
                             >
                               →
                             </button>
                           </div>
                         )}
+                        {/* Desktop: diagonal arrow. Hidden on mobile (image tap opens modal) */}
                         <button
                           onClick={() => openModal(item, imgIdx)}
-                          className='coll-arrow text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-[3px] group-hover:translate-y-[-3px] transition-all duration-200 bg-transparent border-0 cursor-pointer'
+                          className='coll-arrow max-[900px]:hidden text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-[3px] group-hover:translate-y-[-3px] transition-all duration-200 bg-transparent border-0 cursor-pointer px-1'
                           aria-label={`Otwórz ${name}`}
                         >
                           ↗
@@ -720,19 +741,23 @@ export default function Home() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className='fixed inset-0 z-[500] flex items-stretch bg-[rgba(10,10,9,0.82)] backdrop-blur-[6px]'
+            className='fixed inset-0 z-[500] flex items-stretch max-[900px]:flex-col max-[900px]:justify-end bg-[rgba(10,10,9,0.82)] backdrop-blur-[6px]'
             onClick={closeModal}
           >
             <motion.div
-              initial={{ x: 60, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: 60, opacity: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className='ml-auto flex w-full max-w-[1080px] bg-[#f4f3f0] overflow-hidden max-[900px]:flex-col max-[900px]:max-w-full max-[900px]:overflow-y-auto'
+              initial={
+                isMobile ? { y: "100%", opacity: 1 } : { x: 60, opacity: 0 }
+              }
+              animate={isMobile ? { y: 0, opacity: 1 } : { x: 0, opacity: 1 }}
+              exit={
+                isMobile ? { y: "100%", opacity: 1 } : { x: 60, opacity: 0 }
+              }
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className='modal-panel ml-auto flex w-full max-w-[1080px] bg-[#f4f3f0] overflow-hidden max-[900px]:flex-col max-[900px]:max-w-full max-[900px]:mt-auto max-[900px]:max-h-[92dvh] max-[900px]:overflow-y-auto'
               onClick={(e) => e.stopPropagation()}
             >
               {/* LEFT — image gallery */}
-              <div className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:min-h-[56vw]'>
+              <div className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:flex-none max-[900px]:min-h-0 max-[900px]:h-[58vw]'>
                 <AnimatePresence mode='wait'>
                   <motion.div
                     key={modalImgIdx}
@@ -751,19 +776,19 @@ export default function Home() {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Prev/Next arrows */}
+                {/* Prev/Next arrows — bigger on mobile */}
                 {modalItem.images.length > 1 && (
                   <>
                     <button
                       onClick={() => advanceModalImg(-1)}
-                      className='modal-arrow-btn absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
+                      className='modal-arrow-btn absolute left-3 max-[900px]:left-2 top-1/2 -translate-y-1/2 w-10 h-10 max-[900px]:w-12 max-[900px]:h-12 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] active:bg-[#f4f3f0] transition-all duration-200 text-[16px] max-[900px]:text-[20px] z-20'
                       aria-label='Poprzednie zdjęcie'
                     >
                       ←
                     </button>
                     <button
                       onClick={() => advanceModalImg(1)}
-                      className='modal-arrow-btn absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
+                      className='modal-arrow-btn absolute right-3 max-[900px]:right-2 top-1/2 -translate-y-1/2 w-10 h-10 max-[900px]:w-12 max-[900px]:h-12 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] active:bg-[#f4f3f0] transition-all duration-200 text-[16px] max-[900px]:text-[20px] z-20'
                       aria-label='Następne zdjęcie'
                     >
                       →
@@ -771,16 +796,30 @@ export default function Home() {
                   </>
                 )}
 
-                {/* Thumbnails */}
+                {/* Thumbnails (desktop) / Dots (mobile) */}
                 <div className='absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20 px-4'>
+                  {/* Desktop: thumbnail images */}
                   {modalItem.images.map((src, ti) => (
                     <button
                       key={ti}
                       onClick={() => setModalImgIdx(ti)}
-                      className={`modal-thumb relative overflow-hidden transition-all duration-300 ${ti === modalImgIdx ? "w-14 h-9 ring-2 ring-[#f4f3f0]" : "w-9 h-9 opacity-60 hover:opacity-90"}`}
+                      className={`modal-thumb max-[900px]:hidden relative overflow-hidden transition-all duration-300 ${ti === modalImgIdx ? "w-14 h-9 ring-2 ring-[#f4f3f0]" : "w-9 h-9 opacity-60 hover:opacity-90"}`}
                       aria-label={`Zdjęcie ${ti + 1}`}
                     >
                       <Image src={src} alt='' fill className='object-cover' />
+                    </button>
+                  ))}
+                  {/* Mobile: dot indicators */}
+                  {modalItem.images.map((_, ti) => (
+                    <button
+                      key={`dot-${ti}`}
+                      onClick={() => setModalImgIdx(ti)}
+                      className={`hidden max-[900px]:block w-6 h-6 flex items-center justify-center`}
+                      aria-label={`Zdjęcie ${ti + 1}`}
+                    >
+                      <span
+                        className={`block rounded-full transition-all duration-300 ${ti === modalImgIdx ? "w-2.5 h-2.5 bg-[#f4f3f0]" : "w-1.5 h-1.5 bg-[rgba(244,243,240,0.45)]"}`}
+                      />
                     </button>
                   ))}
                 </div>
@@ -792,20 +831,20 @@ export default function Home() {
               </div>
 
               {/* RIGHT — info & specs */}
-              <div className='w-[380px] max-[900px]:w-full flex flex-col bg-[#fafaf8] overflow-y-auto'>
+              <div className='w-[380px] max-[900px]:w-full flex flex-col bg-[#fafaf8] overflow-y-auto max-[900px]:overflow-y-visible flex-shrink-0'>
                 {/* Header */}
-                <div className='flex items-start justify-between p-8 border-b border-[rgba(26,25,22,0.1)]'>
+                <div className='flex items-start justify-between p-6 max-[900px]:p-5 border-b border-[rgba(26,25,22,0.1)]'>
                   <div>
                     <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[#b8b5b0] mb-2'>
                       {modalItem.cat}
                     </p>
-                    <h2 className='text-[28px] font-light tracking-[-0.03em] text-[#1a1916] leading-none'>
+                    <h2 className='text-[26px] max-[900px]:text-[22px] font-light tracking-[-0.03em] text-[#1a1916] leading-none'>
                       {modalItem.name}
                     </h2>
                   </div>
                   <button
                     onClick={closeModal}
-                    className='w-9 h-9 flex items-center justify-center text-[#6b6963] hover:text-[#1a1916] hover:bg-[rgba(26,25,22,0.06)] transition-all duration-200 text-[18px] shrink-0 ml-4'
+                    className='w-10 h-10 max-[900px]:w-12 max-[900px]:h-12 flex items-center justify-center text-[#6b6963] hover:text-[#1a1916] hover:bg-[rgba(26,25,22,0.06)] active:bg-[rgba(26,25,22,0.06)] transition-all duration-200 text-[20px] shrink-0 ml-4'
                     aria-label='Zamknij'
                   >
                     ×
@@ -813,14 +852,14 @@ export default function Home() {
                 </div>
 
                 {/* Description */}
-                <div className='px-8 py-6 border-b border-[rgba(26,25,22,0.1)]'>
+                <div className='px-6 max-[900px]:px-5 py-5 border-b border-[rgba(26,25,22,0.1)]'>
                   <p className='text-[13px] font-normal leading-[1.75] text-[#6b6963]'>
                     {modalItem.desc}
                   </p>
                 </div>
 
                 {/* Specs */}
-                <div className='px-8 py-6 flex-1'>
+                <div className='px-6 max-[900px]:px-5 py-5 flex-1'>
                   <p className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-5'>
                     Specyfikacja
                   </p>
@@ -842,7 +881,7 @@ export default function Home() {
                 </div>
 
                 {/* CTA */}
-                <div className='px-8 pb-8'>
+                <div className='px-6 max-[900px]:px-5 pb-6 max-[900px]:pb-8'>
                   <a
                     href='#kontakt'
                     onClick={closeModal}
@@ -858,11 +897,11 @@ export default function Home() {
       </AnimatePresence>
 
       {/* PRINCIPLES STRIP */}
-      <section className='grid grid-cols-5 border-b border-[rgba(26,25,22,0.1)] bg-[#f4f3f0] max-[900px]:grid-cols-2 max-[900px]:overflow-hidden'>
+      <section className='grid grid-cols-5 border-b border-[rgba(26,25,22,0.1)] bg-[#f4f3f0] max-[900px]:grid-cols-2 max-[480px]:grid-cols-1 max-[900px]:overflow-hidden'>
         {PRINCIPLES.map(({ num, name, desc }, i) => (
           <div
             key={num}
-            className={`value-card sr pr-item px-8 py-12 border-r border-[rgba(26,25,22,0.1)] cursor-default${i === 4 ? " max-[900px]:col-span-2 max-[900px]:border-r-0" : ""}`}
+            className={`value-card sr pr-item px-7 max-[900px]:px-6 py-10 max-[900px]:py-8 border-r border-[rgba(26,25,22,0.1)] cursor-default${i === 4 ? " max-[900px]:col-span-2 max-[480px]:col-span-1 max-[900px]:border-r-0" : ""}`}
           >
             <span className='vc-num text-[11px] font-normal text-[#b8b5b0] tracking-[0.1em] mb-5 block'>
               {num}
@@ -950,7 +989,7 @@ export default function Home() {
             <a
               ref={archMagnetRef}
               href='#kontakt'
-              className='magnetic-btn arch-btn inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.1em] uppercase text-[rgba(244,243,240,0.9)] no-underline border-b border-[rgba(244,243,240,0.3)] pb-1 w-fit'
+              className='magnetic-btn arch-btn inline-flex items-center gap-[10px] text-[11px] font-medium tracking-[0.1em] uppercase text-[rgba(244,243,240,0.9)] no-underline border-b border-[rgba(244,243,240,0.3)] pb-1 w-fit max-[900px]:!transform-none'
               onMouseMove={handleArchMagnet}
               onMouseLeave={handleArchMagnetLeave}
             >
@@ -973,7 +1012,7 @@ export default function Home() {
         className='pt-16 px-10 pb-10 bg-[#f4f3f0] max-[900px]:px-6 max-[900px]:pt-12 max-[900px]:pb-8'
         id='kontakt'
       >
-        <div className='grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-12 pb-14 border-b border-[rgba(26,25,22,0.1)] mb-8 max-[900px]:grid-cols-2'>
+        <div className='grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-12 pb-14 border-b border-[rgba(26,25,22,0.1)] mb-8 max-[900px]:grid-cols-2 max-[480px]:grid-cols-1 max-[900px]:gap-8'>
           <div>
             <a
               href='#'
@@ -1004,7 +1043,7 @@ export default function Home() {
             </div>
           ))}
         </div>
-        <div className='flex justify-between items-center'>
+        <div className='flex justify-between items-center max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-2'>
           <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
             © 2026 <span className='uppercase'>Hopla</span>{" "}
             <span className='text-[9px] font-normal uppercase'>studio</span>.

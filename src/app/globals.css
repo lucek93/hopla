@@ -382,3 +382,93 @@ body {
 .modal-thumb {
   cursor: pointer;
 }
+
+/* ── TOUCH / MOBILE OVERRIDES ── */
+@media (pointer: coarse) {
+  /* Hide custom cursor entirely on touch devices */
+  .cursor-dot {
+    display: none !important;
+  }
+
+  /* Disable hover-only CSS image transforms */
+  .coll-item:hover .coll-img-inner {
+    transform: none;
+    filter: saturate(0.7) brightness(1.04);
+  }
+  .coll-item:hover .coll-num-overlay {
+    color: rgba(26, 25, 22, 0.15);
+    transform: translateY(6px);
+  }
+  .coll-item:hover .coll-arrow {
+    transform: none;
+    color: #b8b5b0;
+  }
+
+  /* Disable value-card sweep animation on touch */
+  .value-card::before {
+    display: none;
+  }
+  .value-card:hover .vc-num {
+    color: #b8b5b0;
+  }
+  .value-card:hover .vc-name {
+    color: #1a1916;
+  }
+  .value-card:hover .vc-desc {
+    color: #6b6963;
+  }
+  .pr-item:hover {
+    background: transparent;
+  }
+
+  /* Disable material image zoom on touch */
+  .mat-img:hover .mat-img-inner {
+    transform: none;
+  }
+
+  /* Disable show-more hover fill on touch */
+  .show-more-btn:hover .show-more-bg {
+    transform: translateY(101%);
+  }
+  .show-more-btn:hover {
+    color: #1a1916;
+    border-color: rgba(26, 25, 22, 0.2);
+  }
+
+  /* Disable mat-spec-row sweep */
+  .mat-spec-row::after {
+    display: none;
+  }
+}
+
+/* Fast tap response on all interactive elements */
+button,
+a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── MOBILE COLLECTION TWEAKS ── */
+@media (max-width: 900px) {
+  /* Scale down the large number overlay on narrow cards */
+  .coll-num-overlay {
+    font-size: clamp(44px, 18vw, 80px);
+  }
+
+  /* Always show dot indicators on touch — no hover needed */
+  .coll-dots-mobile {
+    opacity: 1 !important;
+  }
+
+  /* Always show card nav buttons on mobile */
+  .coll-nav-mobile {
+    opacity: 1 !important;
+  }
+}
+
+/* ── MODAL MOBILE FULLSCREEN ── */
+@media (max-width: 900px) {
+  .modal-panel {
+    border-radius: 16px 16px 0 0;
+  }
+}
