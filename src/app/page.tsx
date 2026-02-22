@@ -209,7 +209,6 @@ const FOOTER_COLS = [
     title: "Studio",
     links: [
       { label: "O marce", href: "/o-marce" },
-      // { label: "Materiał", href: "#material" },
       { label: "Architekci", href: "#architekci" },
     ],
   },
