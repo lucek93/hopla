@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const PILLS = [
   "Inżynieryjna precyzja",
@@ -11,10 +13,150 @@ const PILLS = [
 ];
 
 const COLLECTION = [
-  { n: 1, name: "Plane 01", cat: "Stolik kawowy" },
-  { n: 2, name: "Arc 01", cat: "Siedzisko" },
-  { n: 3, name: "Block 01", cat: "Krzesło" },
-  { n: 4, name: "Grid 01", cat: "System półek" },
+  {
+    n: 1,
+    name: "Plane 01",
+    cat: "Stolik kawowy",
+    desc: "Minimalistyczny stolik kawowy o perfekcyjnie płaskiej geometrii. Blat z litej stali szczotkowanej na precyzyjnie wyciętej ramie.",
+    images: [
+      "/landing/collection-01.jpeg",
+      "/landing/collection-02.jpeg",
+      "/landing/material.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "120 × 60 × 35 cm" },
+      { k: "Grubość", v: "4 mm" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "4–6 tygodni" },
+    ],
+  },
+  {
+    n: 2,
+    name: "Arc 01",
+    cat: "Siedzisko",
+    desc: "Siedzisko inspirowane łukiem architektonicznym. Jedna linia gięcia, zero spawów widocznych z zewnątrz.",
+    images: [
+      "/landing/collection-02.jpeg",
+      "/landing/collection-03.jpeg",
+      "/landing/collection-01.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "80 × 40 × 42 cm" },
+      { k: "Nośność", v: "180 kg" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "5–7 tygodni" },
+    ],
+  },
+  {
+    n: 3,
+    name: "Block 01",
+    cat: "Krzesło",
+    desc: "Krzesło definiowane przez czysty prostopadłościan. Surowe, ale precyzyjnie wyważone proporcje.",
+    images: [
+      "/landing/collection-03.jpeg",
+      "/landing/collection-04.jpeg",
+      "/landing/collection-02.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "46 × 52 × 78 cm" },
+      { k: "Siedzisko", v: "46 × 42 cm" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "4–6 tygodni" },
+    ],
+  },
+  {
+    n: 4,
+    name: "Grid 01",
+    cat: "System półek",
+    desc: "Modularny system półek oparty na siatce 30 mm. Konfigurowalny w nieskończoność, montaż bez narzędzi.",
+    images: [
+      "/landing/collection-04.jpeg",
+      "/landing/collection-01.jpeg",
+      "/landing/material.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Moduł bazowy", v: "90 × 30 × 30 cm" },
+      { k: "Nośność półki", v: "25 kg" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "6–8 tygodni" },
+    ],
+  },
+  {
+    n: 5,
+    name: "Mono 01",
+    cat: "Stolik boczny",
+    desc: "Stolik boczny zredukowany do jednej pionowej płaszczyzny z wyciętym otworem funkcyjnym.",
+    images: [
+      "/landing/material.jpeg",
+      "/landing/collection-01.jpeg",
+      "/landing/collection-04.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "40 × 35 × 55 cm" },
+      { k: "Grubość", v: "3 mm" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "3–5 tygodni" },
+    ],
+  },
+  {
+    n: 6,
+    name: "Frame 01",
+    cat: "Konsola",
+    desc: "Konsola-rama zawieszona na ścianie. Prosta linia, precyzyjny kąt prosty, zero kompromisów.",
+    images: [
+      "/landing/collection-02.jpeg",
+      "/landing/material.jpeg",
+      "/landing/collection-03.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "100 × 30 × 75 cm" },
+      { k: "Montaż", v: "Ścienny, ukryty" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "5–7 tygodni" },
+    ],
+  },
+  {
+    n: 7,
+    name: "Slab 01",
+    cat: "Ławka",
+    desc: "Ławka-monolith. Jedna forma bez przerwania linii — od nogi do siedziska.",
+    images: [
+      "/landing/collection-03.jpeg",
+      "/landing/collection-01.jpeg",
+      "/landing/collection-02.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "160 × 38 × 44 cm" },
+      { k: "Nośność", v: "300 kg" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "5–8 tygodni" },
+    ],
+  },
+  {
+    n: 8,
+    name: "Tower 01",
+    cat: "Wieszak",
+    desc: "Wieszak-kolumna. Minimalna forma, maksymalna funkcjonalność. Sześć punktów zawieszenia.",
+    images: [
+      "/landing/collection-04.jpeg",
+      "/landing/collection-02.jpeg",
+      "/landing/collection-03.jpeg",
+    ],
+    specs: [
+      { k: "Materiał", v: "Stal nierdzewna 304" },
+      { k: "Wymiary", v: "Ø 12 × 180 cm" },
+      { k: "Punkty", v: "6 × stalowy hak" },
+      { k: "Wykończenie", v: "Szczotkowane, satynowe" },
+      { k: "Czas realizacji", v: "3–4 tygodnie" },
+    ],
+  },
 ];
 
 const PRINCIPLES = [
@@ -67,8 +209,8 @@ const FOOTER_COLS = [
     title: "Studio",
     links: [
       { label: "O marce", href: "/o-marce" },
-      { label: "Materiał", href: "#material" },
-      { label: "Dla architektów", href: "#architekci" },
+      // { label: "Materiał", href: "#material" },
+      { label: "Architekci", href: "#architekci" },
     ],
   },
   {
@@ -90,6 +232,62 @@ export default function Home() {
   });
   const heroImgRef = useRef<HTMLDivElement>(null);
   const archMagnetRef = useRef<HTMLAnchorElement>(null);
+
+  // Collection state
+  const [showAllItems, setShowAllItems] = useState(false);
+  const [cardImgIdx, setCardImgIdx] = useState<Record<number, number>>({});
+  const [modalItem, setModalItem] = useState<
+    (typeof COLLECTION)[number] | null
+  >(null);
+  const [modalImgIdx, setModalImgIdx] = useState(0);
+
+  const openModal = useCallback(
+    (item: (typeof COLLECTION)[number], startIdx: number) => {
+      setModalItem(item);
+      setModalImgIdx(startIdx);
+      document.body.style.overflow = "hidden";
+    },
+    [],
+  );
+
+  const closeModal = useCallback(() => {
+    setModalItem(null);
+    document.body.style.overflow = "";
+  }, []);
+
+  const advanceCardImg = useCallback(
+    (e: React.MouseEvent, n: number, dir: 1 | -1, len: number) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setCardImgIdx((prev) => ({
+        ...prev,
+        [n]: ((prev[n] ?? 0) + dir + len) % len,
+      }));
+    },
+    [],
+  );
+
+  const advanceModalImg = useCallback(
+    (dir: 1 | -1) => {
+      if (!modalItem) return;
+      const len = modalItem.images.length;
+      setModalImgIdx((i) => (i + dir + len) % len);
+    },
+    [modalItem],
+  );
+
+  // Close modal on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeModal();
+      if (modalItem) {
+        if (e.key === "ArrowRight") advanceModalImg(1);
+        if (e.key === "ArrowLeft") advanceModalImg(-1);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [closeModal, modalItem, advanceModalImg]);
 
   // Scroll progress bar + hero parallax
   useEffect(() => {
@@ -202,42 +400,40 @@ export default function Home() {
       />
       {/* NAV */}
       <nav className='fixed inset-x-0 top-0 z-[200] h-16 flex items-center justify-between px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-6'>
-        <a
-          href='#'
-          className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
-        >
-          Hopla<span className='text-[10px] font-normal'> studio</span>
-        </a>
         <ul className='flex gap-8 list-none max-[900px]:hidden'>
           {[
             { href: "#kolekcja", label: "Kolekcja" },
-            { href: "#material", label: "Materiał" },
             { href: "#architekci", label: "Architekci" },
+            { href: "/o-marce", label: "O marce" },
           ].map((link) => (
             <li key={link.href}>
-              <a
+              <Link
                 href={link.href}
-                className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916]'
+                className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916] hover:font-semibold'
               >
                 {link.label}
-              </a>
+              </Link>
             </li>
           ))}
         </ul>
-        <a
-          href='#kontakt'
+        <Link
+          href='/'
+          className='text-[15px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
+        >
+          Hopla<span className='text-[10px] font-normal'> studio</span>
+        </Link>
+        <Link
+          href='/#kontakt'
           className='nav-cta text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[9px] px-5 no-underline'
         >
           Kontakt
-        </a>
+        </Link>
       </nav>
 
       {/* HERO */}
       <section className='grid grid-cols-2 pt-16 h-[100svh] max-[900px]:grid-cols-1 max-[900px]:h-auto'>
         <div className='flex flex-col justify-between px-10 py-16 pb-12 bg-[#f4f3f0] overflow-hidden max-[900px]:px-6 max-[900px]:py-10 max-[900px]:gap-8'>
-          <p className='hero-eyebrow text-[11px] font-normal tracking-[0.14em] uppercase text-[#b8b5b0]'>
-            Hopla.studio — Warszawa, PL
-          </p>
+          <p className='hero-eyebrow text-[11px] font-normal tracking-[0.14em] uppercase text-[#b8b5b0]'></p>
           <h1 className='hero-h1 text-[clamp(44px,5.5vw,78px)] font-light leading-[1.04] tracking-[-0.03em] text-[#1a1916]'>
             Stal
             <br />
@@ -267,7 +463,7 @@ export default function Home() {
             className='absolute inset-0 will-change-transform'
           >
             <Image
-              src='/landing/hero.jpeg'
+              src='/landing/hero.png'
               alt='Hopla studio — meble stalowe'
               fill
               className='object-cover object-center hero-img-zoom saturate-[0.75]'
@@ -326,6 +522,7 @@ export default function Home() {
       </div>
 
       {/* ABOUT */}
+      {/* 
       <section
         className='grid grid-cols-[1fr_2fr] border-b border-[rgba(26,25,22,0.1)] max-[900px]:grid-cols-1'
         id='o-marce'
@@ -360,6 +557,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+           */}
 
       {/* COLLECTION */}
       <section className='border-b border-[rgba(26,25,22,0.1)]' id='kolekcja'>
@@ -368,45 +566,297 @@ export default function Home() {
             Kolekcja
           </span>
           <span className='text-[12px] font-normal text-[#b8b5b0]'>
-            4 obiekty dostępne
+            {COLLECTION.length} obiektów dostępnych
           </span>
         </div>
-        <div className='grid grid-cols-4 max-[900px]:grid-cols-2'>
-          {COLLECTION.map(({ n, name, cat }) => (
-            <a
-              key={n}
-              href='#'
-              className='coll-item sr border-r border-[rgba(26,25,22,0.1)] last:border-r-0 relative overflow-hidden block no-underline text-inherit'
-            >
-              <div className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'>
-                <span className='coll-num-overlay' aria-hidden='true'>
-                  {String(n).padStart(2, "0")}
-                </span>
-                <Image
-                  src={`/landing/collection-0${n}.jpeg`}
-                  alt={name}
-                  width={400}
-                  height={533}
-                  className='coll-img-inner'
-                />
-              </div>
-              <div className='flex justify-between items-end px-6 pt-5 pb-7 border-t border-[rgba(26,25,22,0.1)]'>
-                <div>
-                  <p className='text-[14px] font-normal tracking-[-0.01em] text-[#1a1916] mb-1'>
-                    {name}
-                  </p>
-                  <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
-                    {cat}
-                  </p>
-                </div>
-                <span className='coll-arrow text-[16px] text-[#b8b5b0] transition-transform duration-200'>
-                  ↗
-                </span>
-              </div>
-            </a>
-          ))}
+
+        <motion.div className='grid grid-cols-4 max-[900px]:grid-cols-2' layout>
+          <AnimatePresence initial={false}>
+            {(showAllItems ? COLLECTION : COLLECTION.slice(0, 4)).map(
+              (item) => {
+                const { n, name, cat, images } = item;
+                const imgIdx = cardImgIdx[n] ?? 0;
+                return (
+                  <motion.div
+                    key={n}
+                    layout
+                    initial={{ opacity: 0, y: 32 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 16 }}
+                    transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                    className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:[&:nth-child(2n)]:border-r-0 relative overflow-hidden'
+                  >
+                    {/* Image zone — click to open modal */}
+                    <button
+                      className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
+                      onClick={() => openModal(item, imgIdx)}
+                      aria-label={`Otwórz galerię: ${name}`}
+                    >
+                      <div className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'>
+                        {/* Number overlay */}
+                        <span
+                          className='coll-num-overlay z-50'
+                          aria-hidden='true'
+                        >
+                          {String(n).padStart(2, "0")}
+                        </span>
+
+                        {/* Image with crossfade */}
+                        <AnimatePresence mode='wait'>
+                          <motion.div
+                            key={imgIdx}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className='absolute inset-0'
+                          >
+                            <Image
+                              src={images[imgIdx]}
+                              alt={`${name} — zdjęcie ${imgIdx + 1}`}
+                              fill
+                              className='coll-img-inner'
+                            />
+                          </motion.div>
+                        </AnimatePresence>
+
+                        {/* Gallery dot indicators */}
+                        {images.length > 1 && (
+                          <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                            {images.map((_, di) => (
+                              <span
+                                key={di}
+                                className={`block w-1 h-1 rounded-full transition-all duration-300 ${di === imgIdx ? "bg-[#1a1916] scale-125" : "bg-[rgba(26,25,22,0.3)]"}`}
+                              />
+                            ))}
+                          </div>
+                        )}
+
+                        {/* View overlay */}
+                        <div className='absolute inset-0 flex items-center justify-center bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] transition-colors duration-400 z-10'>
+                          <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300'>
+                            Zobacz obiekt
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+
+                    {/* Card footer with arrow nav */}
+                    <div className='flex justify-between items-end px-6 pt-5 pb-7 border-t border-[rgba(26,25,22,0.1)]'>
+                      <div>
+                        <p className='text-[14px] font-normal tracking-[-0.01em] text-[#1a1916] mb-1'>
+                          {name}
+                        </p>
+                        <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
+                          {cat}
+                        </p>
+                      </div>
+                      <div className='flex items-center gap-2'>
+                        {images.length > 1 && (
+                          <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                            <button
+                              onClick={(e) =>
+                                advanceCardImg(e, n, -1, images.length)
+                              }
+                              className='coll-nav-btn w-7 h-7 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                              aria-label='Poprzednie zdjęcie'
+                            >
+                              ←
+                            </button>
+                            <button
+                              onClick={(e) =>
+                                advanceCardImg(e, n, 1, images.length)
+                              }
+                              className='coll-nav-btn w-7 h-7 flex items-center justify-center border border-[rgba(26,25,22,0.15)] text-[#6b6963] hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0] transition-all duration-200 text-[11px]'
+                              aria-label='Następne zdjęcie'
+                            >
+                              →
+                            </button>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => openModal(item, imgIdx)}
+                          className='coll-arrow text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-[3px] group-hover:translate-y-[-3px] transition-all duration-200 bg-transparent border-0 cursor-pointer'
+                          aria-label={`Otwórz ${name}`}
+                        >
+                          ↗
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              },
+            )}
+          </AnimatePresence>
+        </motion.div>
+
+        {/* SHOW MORE / LESS */}
+        <div className='flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
+          <button
+            onClick={() => setShowAllItems((v) => !v)}
+            className='show-more-btn group relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.12em] uppercase text-[#1a1916] border border-[rgba(26,25,22,0.2)] px-8 py-4 overflow-hidden transition-colors duration-300 hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0]'
+          >
+            <span className='relative z-10 flex items-center gap-3'>
+              <span>
+                {showAllItems ? "Pokaż mniej" : "Pokaż więcej obiektów"}
+              </span>
+              <motion.span
+                animate={{ rotate: showAllItems ? 180 : 0 }}
+                transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                className='text-[14px] inline-block'
+              >
+                ↓
+              </motion.span>
+            </span>
+            <span className='show-more-bg' aria-hidden='true' />
+          </button>
         </div>
       </section>
+
+      {/* COLLECTION MODAL */}
+      <AnimatePresence>
+        {modalItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className='fixed inset-0 z-[500] flex items-stretch bg-[rgba(10,10,9,0.82)] backdrop-blur-[6px]'
+            onClick={closeModal}
+          >
+            <motion.div
+              initial={{ x: 60, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 60, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className='ml-auto flex w-full max-w-[1080px] bg-[#f4f3f0] overflow-hidden max-[900px]:flex-col max-[900px]:max-w-full max-[900px]:overflow-y-auto'
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* LEFT — image gallery */}
+              <div className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:min-h-[56vw]'>
+                <AnimatePresence mode='wait'>
+                  <motion.div
+                    key={modalImgIdx}
+                    initial={{ opacity: 0, scale: 1.03 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.98 }}
+                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    className='absolute inset-0'
+                  >
+                    <Image
+                      src={modalItem.images[modalImgIdx]}
+                      alt={`${modalItem.name} — zdjęcie ${modalImgIdx + 1}`}
+                      fill
+                      className='object-cover object-center saturate-[0.8]'
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Prev/Next arrows */}
+                {modalItem.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => advanceModalImg(-1)}
+                      className='modal-arrow-btn absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
+                      aria-label='Poprzednie zdjęcie'
+                    >
+                      ←
+                    </button>
+                    <button
+                      onClick={() => advanceModalImg(1)}
+                      className='modal-arrow-btn absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
+                      aria-label='Następne zdjęcie'
+                    >
+                      →
+                    </button>
+                  </>
+                )}
+
+                {/* Thumbnails */}
+                <div className='absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20 px-4'>
+                  {modalItem.images.map((src, ti) => (
+                    <button
+                      key={ti}
+                      onClick={() => setModalImgIdx(ti)}
+                      className={`modal-thumb relative overflow-hidden transition-all duration-300 ${ti === modalImgIdx ? "w-14 h-9 ring-2 ring-[#f4f3f0]" : "w-9 h-9 opacity-60 hover:opacity-90"}`}
+                      aria-label={`Zdjęcie ${ti + 1}`}
+                    >
+                      <Image src={src} alt='' fill className='object-cover' />
+                    </button>
+                  ))}
+                </div>
+
+                {/* Image counter */}
+                <div className='absolute top-4 left-4 z-20 text-[10px] font-medium tracking-[0.14em] uppercase text-[#f4f3f0] bg-[rgba(26,25,22,0.5)] px-3 py-1.5 backdrop-blur-sm'>
+                  {modalImgIdx + 1} / {modalItem.images.length}
+                </div>
+              </div>
+
+              {/* RIGHT — info & specs */}
+              <div className='w-[380px] max-[900px]:w-full flex flex-col bg-[#fafaf8] overflow-y-auto'>
+                {/* Header */}
+                <div className='flex items-start justify-between p-8 border-b border-[rgba(26,25,22,0.1)]'>
+                  <div>
+                    <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[#b8b5b0] mb-2'>
+                      {modalItem.cat}
+                    </p>
+                    <h2 className='text-[28px] font-light tracking-[-0.03em] text-[#1a1916] leading-none'>
+                      {modalItem.name}
+                    </h2>
+                  </div>
+                  <button
+                    onClick={closeModal}
+                    className='w-9 h-9 flex items-center justify-center text-[#6b6963] hover:text-[#1a1916] hover:bg-[rgba(26,25,22,0.06)] transition-all duration-200 text-[18px] shrink-0 ml-4'
+                    aria-label='Zamknij'
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {/* Description */}
+                <div className='px-8 py-6 border-b border-[rgba(26,25,22,0.1)]'>
+                  <p className='text-[13px] font-normal leading-[1.75] text-[#6b6963]'>
+                    {modalItem.desc}
+                  </p>
+                </div>
+
+                {/* Specs */}
+                <div className='px-8 py-6 flex-1'>
+                  <p className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-5'>
+                    Specyfikacja
+                  </p>
+                  <div className='border-t border-[rgba(26,25,22,0.1)]'>
+                    {modalItem.specs.map(({ k, v }) => (
+                      <div
+                        key={k}
+                        className='mat-spec-row flex justify-between items-center py-3 border-b border-[rgba(26,25,22,0.1)]'
+                      >
+                        <span className='text-[11px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
+                          {k}
+                        </span>
+                        <span className='text-[13px] font-normal text-[#1a1916]'>
+                          {v}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className='px-8 pb-8'>
+                  <a
+                    href='#kontakt'
+                    onClick={closeModal}
+                    className='modal-cta w-full inline-flex items-center justify-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-6 no-underline transition-opacity duration-200 hover:opacity-80'
+                  >
+                    Zapytaj o wycenę →
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* PRINCIPLES STRIP */}
       <section className='grid grid-cols-5 border-b border-[rgba(26,25,22,0.1)] bg-[#f4f3f0] max-[900px]:grid-cols-2 max-[900px]:overflow-hidden'>
@@ -429,6 +879,7 @@ export default function Home() {
       </section>
 
       {/* MATERIAL */}
+      {/* 
       <section
         className='grid grid-cols-2 min-h-[80vh] border-b border-[rgba(26,25,22,0.1)] max-[900px]:grid-cols-1'
         id='material'
@@ -481,10 +932,10 @@ export default function Home() {
 
       {/* ARCHITECTS */}
       <section
-        className='grid grid-cols-2 border-b border-[rgba(26,25,22,0.1)] bg-[#1a1916] overflow-hidden max-[900px]:grid-cols-1'
+        className='grid grid-cols-2 w-full border-b border-[rgba(26,25,22,0.1)] bg-[#1a1916] overflow-hidden h-[clamp(440px,55vh,680px)] max-[900px]:grid-cols-1 max-[900px]:h-auto'
         id='architekci'
       >
-        <div className='sr flex flex-col justify-between px-14 py-20 max-[900px]:px-6 max-[900px]:py-14'>
+        <div className='sr flex flex-col justify-between px-14 py-14 max-[900px]:px-6 max-[900px]:py-14'>
           <p className='text-[11px] font-normal tracking-[0.14em] uppercase text-[rgba(244,243,240,0.35)]'>
             Dla architektów i projektantów
           </p>
@@ -510,10 +961,10 @@ export default function Home() {
         </div>
         <div className='relative overflow-hidden max-[900px]:h-[50vw]'>
           <Image
-            src='/landing/architects.jpeg'
+            src='/landing/architects.png'
             alt='Architekci i projektanci'
             fill
-            className='object-cover object-center w-full h-full saturate-[0.4] brightness-90 mix-blend-luminosity opacity-60'
+            className='object-cover [object-position:center_65%] saturate-[0.4] brightness-90 mix-blend-luminosity opacity-60'
           />
         </div>
       </section>
@@ -529,7 +980,7 @@ export default function Home() {
               href='#'
               className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] block mb-3.5 no-underline'
             >
-              Hopla.studio
+              Hopla <span className='text-[10px] font-normal'>studio</span>
             </a>
             <p className='text-[12px] font-normal leading-[1.7] text-[#6b6963]'>
               Minimalistyczne obiekty stalowe
@@ -556,7 +1007,9 @@ export default function Home() {
         </div>
         <div className='flex justify-between items-center'>
           <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
-            © 2025 Hopla.studio. Wszelkie prawa zastrzeżone.
+            © 2026 <span className='uppercase'>Hopla</span>{" "}
+            <span className='text-[9px] font-normal uppercase'>studio</span>.
+            Wszelkie prawa zastrzeżone.
           </span>
           <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
             Warszawa, Polska

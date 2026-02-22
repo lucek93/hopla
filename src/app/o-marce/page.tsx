@@ -137,10 +137,10 @@ const FOOTER_COLS = [
   {
     title: "Kolekcja",
     links: [
-      { label: "Stoliki kawowe", href: "#" },
-      { label: "Siedziska", href: "#" },
-      { label: "Krzesła", href: "#" },
-      { label: "Systemy półek", href: "#" },
+      { label: "Stoliki kawowe", href: "/#kolekcja" },
+      { label: "Siedziska", href: "/#kolekcja" },
+      { label: "Krzesła", href: "/#kolekcja" },
+      { label: "Systemy półek", href: "/#kolekcja" },
     ],
   },
   {
@@ -349,28 +349,29 @@ export default function OMarce() {
 
       {/* NAV */}
       <nav className='fixed inset-x-0 top-0 z-[200] h-16 flex items-center justify-between px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-6'>
-        <Link
-          href='/'
-          className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
-        >
-          Hopla.studio
-        </Link>
         <ul className='flex gap-8 list-none max-[900px]:hidden'>
           {[
             { href: "/#kolekcja", label: "Kolekcja" },
-            { href: "/#material", label: "Materiał" },
+
             { href: "/#architekci", label: "Architekci" },
           ].map((link) => (
             <li key={link.href}>
               <Link
                 href={link.href}
-                className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916]'
+                className='text-[12px] font-normal tracking-[0.04em] text-[#6b6963] no-underline transition-colors duration-[180ms] hover:text-[#1a1916] hover:font-semibold'
               >
                 {link.label}
               </Link>
             </li>
           ))}
         </ul>
+        <Link
+          href='/'
+          className='text-[15px] font-medium tracking-[0.06em] uppercase text-[#1a1916] no-underline'
+        >
+          Hopla <span className='text-[10px] font-normal'> studio</span>
+        </Link>
+
         <Link
           href='/#kontakt'
           className='nav-cta text-[11px] font-medium tracking-[0.08em] uppercase bg-[#1a1916] text-[#f4f3f0] py-[9px] px-5 no-underline'
@@ -380,10 +381,11 @@ export default function OMarce() {
       </nav>
 
       {/* HERO — word-by-word reveal + parallax image */}
-      <section className='pt-16 grid grid-cols-2 min-h-[70vh] border-b border-[rgba(26,25,22,0.1)] max-[900px]:grid-cols-1'>
+      <section className='pt-16 grid grid-cols-2 min-h-[70vh] max-h-[100vh] border-b border-[rgba(26,25,22,0.1)] max-[900px]:grid-cols-1 max-[900px]:max-h-none'>
         <div className='flex flex-col justify-between px-10 py-[72px] bg-[#f4f3f0] overflow-hidden max-[900px]:px-6 max-[900px]:py-12'>
           <p className='hero-eyebrow text-[11px] font-normal tracking-[0.14em] uppercase text-[#b8b5b0]'>
-            Hopla.studio — O marce
+            Hopla <span className='text-[10px] font-normal'>studio</span> — O
+            marce
           </p>
           <div>
             <h1 className='text-[clamp(40px,5vw,72px)] font-light leading-[1.1] tracking-[-0.03em] text-[#1a1916] mb-8'>
@@ -396,7 +398,7 @@ export default function OMarce() {
               />
             </h1>
             <p className='hero-bottom text-[13px] font-normal leading-[1.7] text-[#6b6963] max-w-[320px]'>
-              Hopla.studio powstało z pasji do stali i przekonania, że materiał
+              Hopla studio powstało z pasji do stali i przekonania, że materiał
               nie potrzebuje ozdobników.
             </p>
           </div>
@@ -410,14 +412,14 @@ export default function OMarce() {
             Skontaktuj się →
           </Link>
         </div>
-        <div className='relative overflow-hidden max-[900px]:h-[55vw]'>
+        <div className='relative overflow-hidden min-h-[400px] max-h-[90vh] max-[900px]:min-h-0 max-[900px]:max-h-none max-[900px]:h-[55vw]'>
           <div
             ref={heroImgRef}
-            className='absolute inset-0 scale-[1.14] will-change-transform origin-center'
+            className='absolute inset-0 will-change-transform origin-center'
           >
             <Image
               src='/landing/material.jpeg'
-              alt='Hopla.studio — stal szczotkowana'
+              alt='Hopla studio — stal szczotkowana'
               fill
               className='object-cover object-center saturate-[0.68] brightness-105'
               priority
@@ -451,7 +453,7 @@ export default function OMarce() {
         </div>
         <div className='flex flex-col gap-10 py-[72px] pr-[64px] pb-[72px] pl-[56px] max-[900px]:px-6 max-[900px]:py-12'>
           <p className='sr text-[clamp(20px,2.2vw,30px)] font-light leading-[1.55] tracking-[-0.02em] text-[#1a1916]'>
-            Hopla.studio powstało z wieloletniego doświadczenia pracy ze stalą i
+            HOPLA studio powstało z wieloletniego doświadczenia pracy ze stalą i
             przekonania, że materiał nie potrzebuje ozdobników.
           </p>
           <div className='sr flex flex-col gap-6 text-[14px] font-normal leading-[1.75] text-[#6b6963] max-w-[520px]'>
@@ -646,7 +648,7 @@ export default function OMarce() {
               href='/'
               className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] block mb-3.5 no-underline'
             >
-              Hopla.studio
+              Hopla <span className='text-[10px] font-normal'>studio</span>
             </Link>
             <p className='text-[12px] font-normal leading-[1.7] text-[#6b6963]'>
               Minimalistyczne obiekty stalowe
@@ -673,7 +675,9 @@ export default function OMarce() {
         </div>
         <div className='flex justify-between items-center'>
           <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
-            © 2025 Hopla.studio. Wszelkie prawa zastrzeżone.
+            © 2026 <span className='uppercase'>Hopla</span>{" "}
+            <span className='text-[9px] font-normal uppercase'>studio</span>.
+            Wszelkie prawa zastrzeżone.
           </span>
           <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
             Warszawa, Polska
