@@ -780,18 +780,15 @@ export default function Home() {
             Kolekcja
           </span>
           <div className='flex items-center gap-3'>
-            <span className='hidden max-[900px]:flex items-center gap-1 text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
-              przesuwaj <span className='opacity-60'>→</span>
-            </span>
-            <span className='text-[12px] font-normal text-[#b8b5b0] max-[900px]:hidden'>
+            <span className='text-[12px] font-normal text-[#b8b5b0]'>
               {COLLECTION.length} obiektów
             </span>
           </div>
         </div>
 
-        <div className='coll-carousel-wrap max-[900px]:relative'>
+        <div className='coll-carousel-wrap'>
           <motion.div
-            className='grid grid-cols-4 max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:snap-x max-[900px]:snap-mandatory mobile-carousel coll-carousel-track'
+            className='grid grid-cols-4 max-[900px]:grid-cols-2 coll-carousel-track'
             layout
           >
             <AnimatePresence initial={false}>
@@ -807,7 +804,7 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 16 }}
                       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[84vw] max-[900px]:snap-center relative overflow-hidden'
+                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:border-b max-[900px]:[&:nth-child(2n)]:border-r-0 relative overflow-hidden'
                     >
                       {/* Image zone — click to open modal */}
                       <button
@@ -859,18 +856,18 @@ export default function Home() {
                           <div className='absolute inset-0 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10' />
                           {/* Mobile tap hint icon — top right corner */}
                           <span
-                            className='hidden max-[900px]:flex absolute top-3 right-3 z-20 items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] rounded-full'
+                            className='hidden max-[900px]:flex absolute top-2 right-2 z-20 items-center justify-center w-6 h-6 bg-[rgba(26,25,22,0.5)] backdrop-blur-sm text-[#f4f3f0] rounded-full'
                             aria-hidden='true'
                           >
-                            <MoveUpRight className='w-3 h-3' />
+                            <MoveUpRight className='w-2.5 h-2.5' />
                           </span>
                         </div>
                       </button>
 
                       {/* Card footer with arrow nav */}
-                      <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-3 max-[900px]:pb-4 border-t border-[rgba(26,25,22,0.1)]'>
+                      <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-2.5 max-[900px]:pb-3 border-t border-[rgba(26,25,22,0.1)]'>
                         <div>
-                          <p className='text-[13px] max-[900px]:text-[12px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
+                          <p className='text-[13px] max-[900px]:text-[11px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
                             {name}
                           </p>
                           <p className='text-[10px] font-normal tracking-[0.1em] uppercase text-[#b8b5b0]'>
@@ -916,15 +913,7 @@ export default function Home() {
                 },
               )}
             </AnimatePresence>
-            {/* Carousel leading/trailing spacers for snap-center edge cards */}
-            <div
-              className='hidden max-[900px]:block flex-none w-[8vw] shrink-0 order-first'
-              aria-hidden='true'
-            />
-            <div
-              className='hidden max-[900px]:block flex-none w-[8vw] shrink-0'
-              aria-hidden='true'
-            />
+
           </motion.div>
         </div>
 
@@ -932,7 +921,10 @@ export default function Home() {
         {/* Desktop */}
         <div className='max-[900px]:hidden flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
           <button
-            onClick={() => setShowAllItems((v) => !v)}
+            onClick={() => {
+              if (showAllItems) document.getElementById('kolekcja')?.scrollIntoView({ behavior: 'smooth' });
+              setShowAllItems((v) => !v);
+            }}
             className='show-more-btn group relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.12em] uppercase text-[#1a1916] border border-[rgba(26,25,22,0.2)] px-8 py-4 overflow-hidden transition-colors duration-300 hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0]'
           >
             <span className='relative z-10 flex items-center gap-3'>
@@ -989,7 +981,10 @@ export default function Home() {
               </p>
             </div>
             <button
-              onClick={() => setShowAllItems((v) => !v)}
+              onClick={() => {
+                if (showAllItems) document.getElementById('kolekcja')?.scrollIntoView({ behavior: 'smooth' });
+                setShowAllItems((v) => !v);
+              }}
               className='flex items-center bg-[#1a1916] text-[#f4f3f0] text-[11px] font-medium tracking-[0.1em] uppercase px-5 py-3.5 active:opacity-70 transition-opacity duration-100 border-0 cursor-pointer'
             >
               <AnimatePresence mode='wait'>
