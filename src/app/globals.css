@@ -612,7 +612,6 @@ a {
   }
 }
 
-
 /* ── MODAL DRAG HANDLE ── */
 .modal-drag-handle {
   width: 36px;
@@ -627,5 +626,3 @@ a {
 .mobile-sticky-bar {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
-
-

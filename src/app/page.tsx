@@ -276,6 +276,8 @@ export default function Home() {
   const archMagnetRef = useRef<HTMLButtonElement>(null);
   const modalSwipeStartY = useRef<number | null>(null);
   const modalImageSwipeStartX = useRef<number | null>(null);
+  const cardSwipeStartX = useRef<number | null>(null);
+  const cardDidSwipe = useRef(false);
 
   // Collection state
   const [showAllItems, setShowAllItems] = useState(false);
@@ -788,7 +790,7 @@ export default function Home() {
 
         <div className='coll-carousel-wrap'>
           <motion.div
-            className='grid grid-cols-4 max-[900px]:grid-cols-2 coll-carousel-track'
+            className='grid grid-cols-4 max-[900px]:grid-cols-2 max-[900px]:gap-px max-[900px]:bg-[rgba(26,25,22,0.1)] coll-carousel-track'
             layout
           >
             <AnimatePresence initial={false}>
@@ -804,15 +806,45 @@ export default function Home() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 16 }}
                       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:border-b max-[900px]:[&:nth-child(2n)]:border-r-0 relative overflow-hidden'
+                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:border-0 max-[900px]:bg-[#f4f3f0] relative overflow-hidden flex flex-col'
                     >
                       {/* Image zone — click to open modal */}
                       <button
                         className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
-                        onClick={() => openModal(item, imgIdx)}
+                        onClick={() => {
+                          if (cardDidSwipe.current) {
+                            cardDidSwipe.current = false;
+                            return;
+                          }
+                          openModal(item, imgIdx);
+                        }}
                         aria-label={`Otwórz galerię: ${name}`}
                       >
-                        <div className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'>
+                        <div
+                          className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'
+                          onTouchStart={(e) => {
+                            cardSwipeStartX.current = e.touches[0].clientX;
+                            cardDidSwipe.current = false;
+                          }}
+                          onTouchEnd={(e) => {
+                            if (cardSwipeStartX.current === null) return;
+                            const dx =
+                              e.changedTouches[0].clientX -
+                              cardSwipeStartX.current;
+                            cardSwipeStartX.current = null;
+                            if (Math.abs(dx) > 40 && images.length > 1) {
+                              cardDidSwipe.current = true;
+                              setCardImgIdx((prev) => ({
+                                ...prev,
+                                [n]:
+                                  ((prev[n] ?? 0) +
+                                    (dx < 0 ? 1 : -1) +
+                                    images.length) %
+                                  images.length,
+                              }));
+                            }
+                          }}
+                        >
                           {/* Number overlay */}
                           <span
                             className='coll-num-overlay z-50'
@@ -840,13 +872,17 @@ export default function Home() {
                             </motion.div>
                           </AnimatePresence>
 
-                          {/* Gallery dot indicators — desktop hover only, hidden on mobile */}
+                          {/* Gallery dot indicators — always on mobile, hover on desktop */}
                           {images.length > 1 && (
-                            <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:hidden transition-opacity duration-500'>
+                            <div className='absolute bottom-2.5 left-0 right-0 flex justify-center items-center gap-1 z-20 max-[900px]:opacity-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>
                               {images.map((_, di) => (
                                 <span
                                   key={di}
-                                  className={`block w-1 h-1 rounded-full transition-all duration-300 ${di === imgIdx ? "bg-[#1a1916] scale-125" : "bg-[rgba(26,25,22,0.3)]"}`}
+                                  className={`block rounded-full transition-all duration-300 ${
+                                    di === imgIdx
+                                      ? "w-1.5 h-1.5 bg-[#1a1916]"
+                                      : "w-1 h-1 bg-[rgba(26,25,22,0.35)] max-[900px]:bg-[rgba(26,25,22,0.3)]"
+                                  }`}
                                 />
                               ))}
                             </div>
@@ -865,7 +901,7 @@ export default function Home() {
                       </button>
 
                       {/* Card footer with arrow nav */}
-                      <div className='flex justify-between items-center px-4 max-[900px]:px-3 pt-4 pb-5 max-[900px]:pt-2.5 max-[900px]:pb-3 border-t border-[rgba(26,25,22,0.1)]'>
+                      <div className='flex justify-between items-center px-4 max-[900px]:px-3 h-[72px] max-[900px]:h-[58px] shrink-0 border-t border-[rgba(26,25,22,0.1)]'>
                         <div>
                           <p className='text-[13px] max-[900px]:text-[11px] font-normal tracking-[-0.01em] text-[#1a1916] mb-0.5'>
                             {name}
@@ -913,7 +949,6 @@ export default function Home() {
                 },
               )}
             </AnimatePresence>
-
           </motion.div>
         </div>
 
@@ -922,7 +957,10 @@ export default function Home() {
         <div className='max-[900px]:hidden flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
           <button
             onClick={() => {
-              if (showAllItems) document.getElementById('kolekcja')?.scrollIntoView({ behavior: 'smooth' });
+              if (showAllItems)
+                document
+                  .getElementById("kolekcja")
+                  ?.scrollIntoView({ behavior: "smooth" });
               setShowAllItems((v) => !v);
             }}
             className='show-more-btn group relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.12em] uppercase text-[#1a1916] border border-[rgba(26,25,22,0.2)] px-8 py-4 overflow-hidden transition-colors duration-300 hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0]'
@@ -946,7 +984,7 @@ export default function Home() {
         {/* Mobile — full-width strip */}
         <div className='hidden max-[900px]:block border-t border-[rgba(26,25,22,0.1)]'>
           {/* Progress bar */}
-          <div className='h-[2px] bg-[rgba(26,25,22,0.06)]'>
+          {/* <div className='h-[2px] bg-[rgba(26,25,22,0.06)]'>
             <motion.div
               className='h-full bg-[#1a1916]'
               animate={{
@@ -956,7 +994,7 @@ export default function Home() {
               }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             />
-          </div>
+          </div> */}
           <div className='flex items-center justify-between px-5 py-4'>
             <div>
               <p className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0] mb-0.5'>
@@ -982,7 +1020,10 @@ export default function Home() {
             </div>
             <button
               onClick={() => {
-                if (showAllItems) document.getElementById('kolekcja')?.scrollIntoView({ behavior: 'smooth' });
+                if (showAllItems)
+                  document
+                    .getElementById("kolekcja")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 setShowAllItems((v) => !v);
               }}
               className='flex items-center bg-[#1a1916] text-[#f4f3f0] text-[11px] font-medium tracking-[0.1em] uppercase px-5 py-3.5 active:opacity-70 transition-opacity duration-100 border-0 cursor-pointer'
@@ -1117,7 +1158,10 @@ export default function Home() {
 
               {/* Mobile — dots + swipe hint strip */}
               {modalItem.images.length > 1 && (
-                <div className='hidden max-[900px]:flex items-center justify-between px-5 py-3 bg-[#f4f3f0] border-b border-[rgba(26,25,22,0.08)] shrink-0'>
+                <div className='hidden max-[900px]:flex items-center justify-center gap-4 px-5 py-3 bg-[#f4f3f0] border-b border-[rgba(26,25,22,0.08)] shrink-0'>
+                  <span className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0]'>
+                    ←
+                  </span>
                   <div className='flex items-center gap-1.5'>
                     {modalItem.images.map((_, ti) => (
                       <button
@@ -1133,7 +1177,7 @@ export default function Home() {
                     ))}
                   </div>
                   <span className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0]'>
-                    ← przesuń →
+                    →
                   </span>
                 </div>
               )}
@@ -1676,11 +1720,14 @@ export default function Home() {
           >
             <div className='bg-[rgba(244,243,240,0.96)] backdrop-blur-[16px] border-t border-[rgba(26,25,22,0.12)] px-5 py-3.5 flex items-center gap-4'>
               <div className='flex-1 min-w-0'>
-                <p className='text-[10px] font-medium tracking-[0.12em] uppercase text-[#b8b5b0] mb-0.5'>
-                  Hopla Studio
+                <p className='text-[12px] font-medium tracking-[0.12em] uppercase text-[#b8b5b0] mb-0.5'>
+                  Hopla{" "}
+                  <span className='text-[10px] font-normal uppercase'>
+                    studio
+                  </span>
                 </p>
                 <p className='text-[12px] font-light tracking-[-0.01em] text-[#1a1916] truncate'>
-                  Meble stalowe na wymiar
+                  Zapytaj o produkt
                 </p>
               </div>
               <button
