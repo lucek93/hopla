@@ -274,10 +274,12 @@ export default function Home() {
   }, []);
   const heroImgRef = useRef<HTMLDivElement>(null);
   const archMagnetRef = useRef<HTMLButtonElement>(null);
-  const touchStartX = useRef<number | null>(null);
-  const touchCardN = useRef<number | null>(null);
-  const didSwipe = useRef(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const modalSwipeStartY = useRef<number | null>(null);
+  const modalImageSwipeStartX = useRef<number | null>(null);
+
+  // Active card index for mobile carousel animation
+  const [activeCardIdx, setActiveCardIdx] = useState(0);
 
   // Collection state
   const [showAllItems, setShowAllItems] = useState(false);
@@ -433,6 +435,29 @@ export default function Home() {
     document.querySelectorAll(".sr").forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
+
+  // Mobile carousel scroll → active card tracking
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const center = el.scrollLeft + el.clientWidth / 2;
+      const cards = el.querySelectorAll<HTMLElement>(".coll-item");
+      let closest = 0;
+      let minDist = Infinity;
+      cards.forEach((card, i) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const dist = Math.abs(center - cardCenter);
+        if (dist < minDist) {
+          minDist = dist;
+          closest = i;
+        }
+      });
+      setActiveCardIdx(closest);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [showAllItems]);
 
   // Magnetic architects CTA
   const handleArchMagnet = useCallback(
@@ -793,6 +818,7 @@ export default function Home() {
 
         <div className='coll-carousel-wrap max-[900px]:relative'>
           <motion.div
+            ref={carouselRef}
             className='grid grid-cols-4 max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:snap-x max-[900px]:snap-mandatory mobile-carousel coll-carousel-track'
             layout
           >
@@ -801,56 +827,51 @@ export default function Home() {
                 (item) => {
                   const { n, name, cat, images } = item;
                   const imgIdx = cardImgIdx[n] ?? 0;
+                  const visibleItems = showAllItems
+                    ? COLLECTION
+                    : COLLECTION.slice(0, 4);
+                  const cardIdx = visibleItems.findIndex((i) => i.n === n);
+                  const dist = Math.abs(cardIdx - activeCardIdx);
+                  const mobileScale = isMobile
+                    ? dist === 0
+                      ? 1
+                      : dist === 1
+                        ? 0.92
+                        : 0.86
+                    : 1;
+                  const mobileOpacity = isMobile
+                    ? dist === 0
+                      ? 1
+                      : dist === 1
+                        ? 0.55
+                        : 0.35
+                    : 1;
                   return (
                     <motion.div
                       key={n}
                       layout
                       initial={{ opacity: 0, y: 32 }}
-                      animate={{ opacity: 1, y: 0 }}
+                      animate={{
+                        opacity: isMobile ? mobileOpacity : 1,
+                        y: 0,
+                        scale: mobileScale,
+                      }}
                       exit={{ opacity: 0, y: 16 }}
-                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[78vw] max-[900px]:snap-start relative overflow-hidden'
+                      transition={{
+                        opacity: { duration: 0.3, ease: "easeOut" },
+                        scale: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+                        y: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                        layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                      }}
+                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[84vw] max-[900px]:snap-center relative overflow-hidden max-[900px]:origin-center'
                     >
                       {/* Image zone — click to open modal */}
                       <button
                         className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
-                        onClick={() => {
-                          if (didSwipe.current) {
-                            didSwipe.current = false;
-                            return;
-                          }
-                          openModal(item, imgIdx);
-                        }}
+                        onClick={() => openModal(item, imgIdx)}
                         aria-label={`Otwórz galerię: ${name}`}
                       >
-                        <div
-                          className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'
-                          onTouchStart={(e) => {
-                            touchStartX.current = e.touches[0].clientX;
-                            touchCardN.current = n;
-                            didSwipe.current = false;
-                          }}
-                          onTouchEnd={(e) => {
-                            if (
-                              touchStartX.current === null ||
-                              touchCardN.current !== n
-                            )
-                              return;
-                            const dx =
-                              e.changedTouches[0].clientX - touchStartX.current;
-                            touchStartX.current = null;
-                            if (Math.abs(dx) > 40 && images.length > 1) {
-                              didSwipe.current = true;
-                              const dir = dx < 0 ? 1 : -1;
-                              setCardImgIdx((prev) => ({
-                                ...prev,
-                                [n]:
-                                  ((prev[n] ?? 0) + dir + images.length) %
-                                  images.length,
-                              }));
-                            }
-                          }}
-                        >
+                        <div className='aspect-[3/4] overflow-hidden bg-[#eceae5] relative'>
                           {/* Number overlay */}
                           <span
                             className='coll-num-overlay z-50'
@@ -878,9 +899,9 @@ export default function Home() {
                             </motion.div>
                           </AnimatePresence>
 
-                          {/* Gallery dot indicators — always visible on mobile */}
+                          {/* Gallery dot indicators — desktop hover only, hidden on mobile */}
                           {images.length > 1 && (
-                            <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:opacity-100 transition-opacity duration-500'>
+                            <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10 opacity-0 group-hover:opacity-100 max-[900px]:hidden transition-opacity duration-500'>
                               {images.map((_, di) => (
                                 <span
                                   key={di}
@@ -890,20 +911,15 @@ export default function Home() {
                             </div>
                           )}
 
-                          {/* View overlay — visible on hover (desktop) or always subtle on mobile */}
-                          <div className='absolute inset-0 flex items-end justify-end pb-3 pr-3 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10'>
-                            <span className='text-[10px] font-medium tracking-[0.18em] uppercase text-[#f4f3f0] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300 hidden max-[900px]:hidden'>
-                              Zobacz obiekt
-                            </span>
-                            {/* Mobile tap hint icon */}
-                            <span
-                              className='hidden max-[900px]:flex items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] text-[13px] rounded-full'
-                              aria-hidden='true'
-                            >
-                              {/* ↗ */}
-                              <MoveUpRight className='w-3 h-3' />
-                            </span>
-                          </div>
+                          {/* View overlay — visible on hover (desktop) */}
+                          <div className='absolute inset-0 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10' />
+                          {/* Mobile tap hint icon — top right corner */}
+                          <span
+                            className='hidden max-[900px]:flex absolute top-3 right-3 z-20 items-center justify-center w-8 h-8 bg-[rgba(26,25,22,0.55)] backdrop-blur-sm text-[#f4f3f0] rounded-full'
+                            aria-hidden='true'
+                          >
+                            <MoveUpRight className='w-3 h-3' />
+                          </span>
                         </div>
                       </button>
 
@@ -956,16 +972,21 @@ export default function Home() {
                 },
               )}
             </AnimatePresence>
-            {/* Carousel trailing spacer – peek effect */}
+            {/* Carousel leading/trailing spacers for snap-center edge cards */}
             <div
-              className='hidden max-[900px]:block flex-none w-[6vw] shrink-0'
+              className='hidden max-[900px]:block flex-none w-[8vw] shrink-0 order-first'
+              aria-hidden='true'
+            />
+            <div
+              className='hidden max-[900px]:block flex-none w-[8vw] shrink-0'
               aria-hidden='true'
             />
           </motion.div>
         </div>
 
         {/* SHOW MORE / LESS */}
-        <div className='flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
+        {/* Desktop */}
+        <div className='max-[900px]:hidden flex justify-center py-10 border-t border-[rgba(26,25,22,0.1)]'>
           <button
             onClick={() => setShowAllItems((v) => !v)}
             className='show-more-btn group relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.12em] uppercase text-[#1a1916] border border-[rgba(26,25,22,0.2)] px-8 py-4 overflow-hidden transition-colors duration-300 hover:border-[#1a1916] hover:bg-[#1a1916] hover:text-[#f4f3f0]'
@@ -984,6 +1005,64 @@ export default function Home() {
             </span>
             <span className='show-more-bg' aria-hidden='true' />
           </button>
+        </div>
+
+        {/* Mobile — full-width strip */}
+        <div className='hidden max-[900px]:block border-t border-[rgba(26,25,22,0.1)]'>
+          {/* Progress bar */}
+          <div className='h-[2px] bg-[rgba(26,25,22,0.06)]'>
+            <motion.div
+              className='h-full bg-[#1a1916]'
+              animate={{
+                width: showAllItems
+                  ? "100%"
+                  : `${(4 / COLLECTION.length) * 100}%`,
+              }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+          <div className='flex items-center justify-between px-5 py-4'>
+            <div>
+              <p className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0] mb-0.5'>
+                Kolekcja
+              </p>
+              <p className='text-[13px] font-light text-[#1a1916]'>
+                <AnimatePresence mode='wait'>
+                  <motion.span
+                    key={showAllItems ? "all" : "some"}
+                    initial={{ opacity: 0, y: 4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.25 }}
+                    className='inline-block'
+                  >
+                    {showAllItems
+                      ? `Wszystkie ${COLLECTION.length}`
+                      : `4 z ${COLLECTION.length}`}{" "}
+                    <span className='text-[#b8b5b0]'>obiektów</span>
+                  </motion.span>
+                </AnimatePresence>
+              </p>
+            </div>
+            <button
+              onClick={() => setShowAllItems((v) => !v)}
+              className='flex items-center bg-[#1a1916] text-[#f4f3f0] text-[11px] font-medium tracking-[0.1em] uppercase px-5 py-3.5 active:opacity-70 transition-opacity duration-100 border-0 cursor-pointer'
+            >
+              <AnimatePresence mode='wait'>
+                <motion.span
+                  key={showAllItems ? "less" : "more"}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {showAllItems
+                    ? "Pokaż mniej"
+                    : `+${COLLECTION.length - 4} więcej`}
+                </motion.span>
+              </AnimatePresence>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -1025,7 +1104,19 @@ export default function Home() {
                 <div className='modal-drag-handle' aria-hidden='true' />
               </div>
               {/* LEFT — image gallery */}
-              <div className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:flex-none max-[900px]:min-h-0 max-[900px]:h-[58vw]'>
+              <div
+                className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:flex-none max-[900px]:min-h-0 max-[900px]:h-[58vw]'
+                onTouchStart={(e) => {
+                  modalImageSwipeStartX.current = e.touches[0].clientX;
+                }}
+                onTouchEnd={(e) => {
+                  if (modalImageSwipeStartX.current === null) return;
+                  const dx =
+                    e.changedTouches[0].clientX - modalImageSwipeStartX.current;
+                  modalImageSwipeStartX.current = null;
+                  if (Math.abs(dx) > 40) advanceModalImg(dx < 0 ? 1 : -1);
+                }}
+              >
                 <AnimatePresence mode='wait'>
                   <motion.div
                     key={modalImgIdx}
@@ -1044,19 +1135,19 @@ export default function Home() {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Prev/Next arrows — bigger on mobile */}
+                {/* Prev/Next arrows — desktop only */}
                 {modalItem.images.length > 1 && (
                   <>
                     <button
                       onClick={() => advanceModalImg(-1)}
-                      className='modal-arrow-btn absolute left-3 max-[900px]:left-2 top-1/2 -translate-y-1/2 w-10 h-10 max-[900px]:w-12 max-[900px]:h-12 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] active:bg-[#f4f3f0] transition-all duration-200 text-[16px] max-[900px]:text-[20px] z-20'
+                      className='modal-arrow-btn max-[900px]:hidden absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
                       aria-label='Poprzednie zdjęcie'
                     >
                       ←
                     </button>
                     <button
                       onClick={() => advanceModalImg(1)}
-                      className='modal-arrow-btn absolute right-3 max-[900px]:right-2 top-1/2 -translate-y-1/2 w-10 h-10 max-[900px]:w-12 max-[900px]:h-12 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] active:bg-[#f4f3f0] transition-all duration-200 text-[16px] max-[900px]:text-[20px] z-20'
+                      className='modal-arrow-btn max-[900px]:hidden absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-[rgba(244,243,240,0.85)] backdrop-blur-sm text-[#1a1916] hover:bg-[#f4f3f0] transition-all duration-200 text-[16px] z-20'
                       aria-label='Następne zdjęcie'
                     >
                       →
@@ -1077,19 +1168,6 @@ export default function Home() {
                       <Image src={src} alt='' fill className='object-cover' />
                     </button>
                   ))}
-                  {/* Mobile: dot indicators */}
-                  {modalItem.images.map((_, ti) => (
-                    <button
-                      key={`dot-${ti}`}
-                      onClick={() => setModalImgIdx(ti)}
-                      className={`hidden max-[900px]:flex w-6 h-6 items-center justify-center`}
-                      aria-label={`Zdjęcie ${ti + 1}`}
-                    >
-                      <span
-                        className={`block rounded-full transition-all duration-300 ${ti === modalImgIdx ? "w-2.5 h-2.5 bg-[#f4f3f0]" : "w-1.5 h-1.5 bg-[rgba(244,243,240,0.45)]"}`}
-                      />
-                    </button>
-                  ))}
                 </div>
 
                 {/* Image counter */}
@@ -1097,6 +1175,29 @@ export default function Home() {
                   {modalImgIdx + 1} / {modalItem.images.length}
                 </div>
               </div>
+
+              {/* Mobile — dots + swipe hint strip */}
+              {modalItem.images.length > 1 && (
+                <div className='hidden max-[900px]:flex items-center justify-between px-5 py-3 bg-[#f4f3f0] border-b border-[rgba(26,25,22,0.08)] shrink-0'>
+                  <div className='flex items-center gap-1.5'>
+                    {modalItem.images.map((_, ti) => (
+                      <button
+                        key={ti}
+                        onClick={() => setModalImgIdx(ti)}
+                        className='flex items-center justify-center w-4 h-4'
+                        aria-label={`Zdjęcie ${ti + 1}`}
+                      >
+                        <span
+                          className={`block rounded-full transition-all duration-300 ${ti === modalImgIdx ? "w-1.5 h-1.5 bg-[#1a1916]" : "w-1 h-1 bg-[rgba(26,25,22,0.25)]"}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  <span className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0]'>
+                    ← przesuń →
+                  </span>
+                </div>
+              )}
 
               {/* RIGHT — info & specs */}
               <div className='w-[380px] max-[900px]:w-full flex flex-col bg-[#fafaf8] overflow-y-auto max-[900px]:overflow-y-visible flex-shrink-0'>
