@@ -1130,7 +1130,7 @@ export default function Home() {
                       src={modalItem.images[modalImgIdx]}
                       alt={`${modalItem.name} — zdjęcie ${modalImgIdx + 1}`}
                       fill
-                      className='object-cover object-center saturate-[0.8]'
+                      className='object-cover object-center'
                     />
                   </motion.div>
                 </AnimatePresence>
