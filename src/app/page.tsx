@@ -274,12 +274,8 @@ export default function Home() {
   }, []);
   const heroImgRef = useRef<HTMLDivElement>(null);
   const archMagnetRef = useRef<HTMLButtonElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
   const modalSwipeStartY = useRef<number | null>(null);
   const modalImageSwipeStartX = useRef<number | null>(null);
-
-  // Active card index for mobile carousel animation
-  const [activeCardIdx, setActiveCardIdx] = useState(0);
 
   // Collection state
   const [showAllItems, setShowAllItems] = useState(false);
@@ -435,29 +431,6 @@ export default function Home() {
     document.querySelectorAll(".sr").forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
-
-  // Mobile carousel scroll → active card tracking
-  useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const center = el.scrollLeft + el.clientWidth / 2;
-      const cards = el.querySelectorAll<HTMLElement>(".coll-item");
-      let closest = 0;
-      let minDist = Infinity;
-      cards.forEach((card, i) => {
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-        const dist = Math.abs(center - cardCenter);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = i;
-        }
-      });
-      setActiveCardIdx(closest);
-    };
-    el.addEventListener("scroll", onScroll, { passive: true });
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [showAllItems]);
 
   // Magnetic architects CTA
   const handleArchMagnet = useCallback(
@@ -818,7 +791,6 @@ export default function Home() {
 
         <div className='coll-carousel-wrap max-[900px]:relative'>
           <motion.div
-            ref={carouselRef}
             className='grid grid-cols-4 max-[900px]:flex max-[900px]:overflow-x-auto max-[900px]:snap-x max-[900px]:snap-mandatory mobile-carousel coll-carousel-track'
             layout
           >
@@ -827,43 +799,15 @@ export default function Home() {
                 (item) => {
                   const { n, name, cat, images } = item;
                   const imgIdx = cardImgIdx[n] ?? 0;
-                  const visibleItems = showAllItems
-                    ? COLLECTION
-                    : COLLECTION.slice(0, 4);
-                  const cardIdx = visibleItems.findIndex((i) => i.n === n);
-                  const dist = Math.abs(cardIdx - activeCardIdx);
-                  const mobileScale = isMobile
-                    ? dist === 0
-                      ? 1
-                      : dist === 1
-                        ? 0.92
-                        : 0.86
-                    : 1;
-                  const mobileOpacity = isMobile
-                    ? dist === 0
-                      ? 1
-                      : dist === 1
-                        ? 0.55
-                        : 0.35
-                    : 1;
                   return (
                     <motion.div
                       key={n}
                       layout
                       initial={{ opacity: 0, y: 32 }}
-                      animate={{
-                        opacity: isMobile ? mobileOpacity : 1,
-                        y: 0,
-                        scale: mobileScale,
-                      }}
+                      animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 16 }}
-                      transition={{
-                        opacity: { duration: 0.3, ease: "easeOut" },
-                        scale: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
-                        y: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                        layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-                      }}
-                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[84vw] max-[900px]:snap-center relative overflow-hidden max-[900px]:origin-center'
+                      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                      className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:flex-none max-[900px]:w-[84vw] max-[900px]:snap-center relative overflow-hidden'
                     >
                       {/* Image zone — click to open modal */}
                       <button
