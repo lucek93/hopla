@@ -41,7 +41,7 @@ body {
 
 /* ── TICKER ── */
 .ticker-track {
-  animation: tick 22s linear infinite;
+  animation: tick 50s linear infinite;
 }
 
 /* ── SCROLL REVEAL ── */
@@ -455,7 +455,7 @@ a {
     font-size: clamp(44px, 18vw, 80px);
   }
 
-  /* Always show dot indicators on touch — no hover needed */
+  /* Always show dot indicators on touch - no hover needed */
   .coll-dots-mobile {
     opacity: 1 !important;
   }
@@ -509,7 +509,7 @@ a {
   }
 }
 
-/* ── CONTACT FORM — FLOATING LABELS ── */
+/* ── CONTACT FORM - FLOATING LABELS ── */
 .contact-field-wrap {
   position: relative;
 }

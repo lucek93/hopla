@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MoveUpRight } from "lucide-react";
+import { ContactModal } from "@/components/ContactModal";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const PILLS = [
   "Inżynieryjna precyzja",
@@ -126,7 +128,7 @@ const COLLECTION = [
     n: 7,
     name: "Slab 01",
     cat: "Ławka",
-    desc: "Ławka-monolith. Jedna forma bez przerwania linii — od nogi do siedziska.",
+    desc: "Ławka-monolith. Jedna forma bez przerwania linii - od nogi do siedziska.",
     images: [
       "/landing/collection-03.jpeg",
       "/landing/collection-01.jpeg",
@@ -174,7 +176,7 @@ const PRINCIPLES = [
   {
     num: "03",
     name: "Autentyczność materiału",
-    desc: "Stal szczotkowana eksponowana zgodnie z jej naturą — bez lakierów, szczerze.",
+    desc: "Stal szczotkowana eksponowana zgodnie z jej naturą - bez lakierów.",
   },
   {
     num: "04",
@@ -196,32 +198,6 @@ const MAT_SPECS = [
   { k: "Produkcja", v: "Polska" },
 ];
 
-const FOOTER_COLS = [
-  {
-    title: "Kolekcja",
-    links: [
-      { label: "Stoliki kawowe", href: "#kolekcja" },
-      { label: "Siedziska", href: "#kolekcja" },
-      { label: "Krzesła", href: "#kolekcja" },
-      { label: "Systemy półek", href: "#kolekcja" },
-    ],
-  },
-  {
-    title: "Studio",
-    links: [
-      { label: "O marce", href: "/o-marce" },
-      { label: "Architekci", href: "#architekci" },
-    ],
-  },
-  {
-    title: "Kontakt",
-    links: [
-      { label: "hello@hopla.studio", href: "mailto:hello@hopla.studio" },
-      { label: "Instagram", href: "#" },
-    ],
-  },
-];
-
 export default function Home() {
   const [scrollPct, setScrollPct] = useState(0);
   const [cursor, setCursor] = useState({
@@ -233,44 +209,17 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
-
-  // Contact form state
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  const [formTopic, setFormTopic] = useState<string | null>(null);
-  const [formState, setFormState] = useState<
-    "idle" | "sending" | "success" | "error"
-  >("idle");
+  const [contactModalKey, setContactModalKey] = useState(0);
 
   const openContactModal = useCallback(() => {
+    setContactModalKey((k) => k + 1);
     setContactModalOpen(true);
-    setFormState("idle");
-    setFormData({ name: "", email: "", message: "" });
-    setFormTopic(null);
     document.body.style.overflow = "hidden";
   }, []);
 
   const closeContactModal = useCallback(() => {
     setContactModalOpen(false);
     document.body.style.overflow = "";
-  }, []);
-
-  const handleFormChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    },
-    [],
-  );
-
-  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormState("sending");
-    // Simulate sending — replace with real API call
-    await new Promise((r) => setTimeout(r, 1600));
-    setFormState("success");
   }, []);
   const heroImgRef = useRef<HTMLDivElement>(null);
   const archMagnetRef = useRef<HTMLButtonElement>(null);
@@ -469,7 +418,7 @@ export default function Home() {
       />
       {/* NAV */}
       <nav className='fixed inset-x-0 top-0 z-[200] h-16 grid grid-cols-3 items-center px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-5'>
-        {/* LEFT — desktop links / mobile hamburger */}
+        {/* LEFT - desktop links / mobile hamburger */}
         <div className='flex items-center'>
           {/* Desktop links */}
           <ul className='flex gap-8 list-none max-[900px]:hidden'>
@@ -499,7 +448,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* CENTER — logo */}
+        {/* CENTER - logo */}
         <div className='flex justify-center'>
           <Link
             href='/'
@@ -509,7 +458,7 @@ export default function Home() {
           </Link>
         </div>
 
-        {/* RIGHT — contact CTA */}
+        {/* RIGHT - contact CTA */}
         {isMobile ? null : (
           <div className='flex justify-end'>
             <button
@@ -674,7 +623,7 @@ export default function Home() {
           >
             <Image
               src='/landing/hero.png'
-              alt='Hopla studio — meble stalowe'
+              alt='Hopla studio - meble stalowe'
               fill
               className='object-cover object-center hero-img-zoom saturate-[0.75]'
               priority
@@ -758,7 +707,7 @@ export default function Home() {
           <p className='sr text-[clamp(20px,2.2vw,30px)] font-light leading-[1.55] tracking-[-0.02em] text-[#1a1916]'>
             Hopla.studio powstało z wieloletniego doświadczenia pracy ze stalą i
             przekonania, że materiał nie potrzebuje ozdobników. Tworzymy
-            funkcjonalne obiekty ze szczotkowanej stali — ciętej laserowo i
+            funkcjonalne obiekty ze szczotkowanej stali - ciętej laserowo i
             precyzyjnie giętej w najprostsze możliwe formy.
           </p>
           <div className='sr flex flex-wrap gap-2'>
@@ -808,7 +757,7 @@ export default function Home() {
                       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
                       className='coll-item group sr border-r border-[rgba(26,25,22,0.1)] [&:nth-child(4n)]:border-r-0 max-[900px]:border-0 max-[900px]:bg-[#f4f3f0] relative overflow-hidden flex flex-col'
                     >
-                      {/* Image zone — click to open modal */}
+                      {/* Image zone - click to open modal */}
                       <button
                         className='w-full text-left cursor-pointer bg-transparent border-0 p-0 block'
                         onClick={() => {
@@ -865,14 +814,14 @@ export default function Home() {
                             >
                               <Image
                                 src={images[imgIdx]}
-                                alt={`${name} — zdjęcie ${imgIdx + 1}`}
+                                alt={`${name} - zdjęcie ${imgIdx + 1}`}
                                 fill
                                 className='coll-img-inner'
                               />
                             </motion.div>
                           </AnimatePresence>
 
-                          {/* Gallery dot indicators — always on mobile, hover on desktop */}
+                          {/* Gallery dot indicators - always on mobile, hover on desktop */}
                           {images.length > 1 && (
                             <div className='absolute bottom-2.5 left-0 right-0 flex justify-center items-center gap-1 z-20 max-[900px]:opacity-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500'>
                               {images.map((_, di) => (
@@ -888,9 +837,9 @@ export default function Home() {
                             </div>
                           )}
 
-                          {/* View overlay — visible on hover (desktop) */}
+                          {/* View overlay - visible on hover (desktop) */}
                           <div className='absolute inset-0 bg-[rgba(26,25,22,0)] group-hover:bg-[rgba(26,25,22,0.18)] max-[900px]:bg-transparent transition-colors duration-400 z-10' />
-                          {/* Mobile tap hint icon — top right corner */}
+                          {/* Mobile tap hint icon - top right corner */}
                           <span
                             className='hidden max-[900px]:flex absolute top-2 right-2 z-20 items-center justify-center w-6 h-6 bg-[rgba(26,25,22,0.5)] backdrop-blur-sm text-[#f4f3f0] rounded-full'
                             aria-hidden='true'
@@ -911,7 +860,7 @@ export default function Home() {
                           </p>
                         </div>
                         <div className='flex items-center gap-1.5'>
-                          {/* Image nav — hover on desktop, always visible on mobile */}
+                          {/* Image nav - hover on desktop, always visible on mobile */}
                           {images.length > 1 && (
                             <div className='flex gap-1 opacity-0 group-hover:opacity-100 max-[900px]:hidden transition-opacity duration-300'>
                               <button
@@ -981,7 +930,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Mobile — full-width strip */}
+        {/* Mobile - full-width strip */}
         <div className='hidden max-[900px]:block border-t border-[rgba(26,25,22,0.1)]'>
           {/* Progress bar */}
           {/* <div className='h-[2px] bg-[rgba(26,25,22,0.06)]'>
@@ -1083,7 +1032,7 @@ export default function Home() {
               <div className='hidden max-[900px]:block bg-[#f4f3f0] pt-1 pb-0 shrink-0'>
                 <div className='modal-drag-handle' aria-hidden='true' />
               </div>
-              {/* LEFT — image gallery */}
+              {/* LEFT - image gallery */}
               <div
                 className='relative flex-1 bg-[#eceae5] overflow-hidden min-h-[480px] max-[900px]:flex-none max-[900px]:min-h-0 max-[900px]:h-[58vw]'
                 onTouchStart={(e) => {
@@ -1108,14 +1057,14 @@ export default function Home() {
                   >
                     <Image
                       src={modalItem.images[modalImgIdx]}
-                      alt={`${modalItem.name} — zdjęcie ${modalImgIdx + 1}`}
+                      alt={`${modalItem.name} - zdjęcie ${modalImgIdx + 1}`}
                       fill
                       className='object-cover object-center'
                     />
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Prev/Next arrows — desktop only */}
+                {/* Prev/Next arrows - desktop only */}
                 {modalItem.images.length > 1 && (
                   <>
                     <button
@@ -1156,7 +1105,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Mobile — dots + swipe hint strip */}
+              {/* Mobile - dots + swipe hint strip */}
               {modalItem.images.length > 1 && (
                 <div className='hidden max-[900px]:flex items-center justify-center gap-4 px-5 py-3 bg-[#f4f3f0] border-b border-[rgba(26,25,22,0.08)] shrink-0'>
                   <span className='text-[10px] font-normal tracking-[0.12em] uppercase text-[#b8b5b0]'>
@@ -1182,7 +1131,7 @@ export default function Home() {
                 </div>
               )}
 
-              {/* RIGHT — info & specs */}
+              {/* RIGHT - info & specs */}
               <div className='w-[380px] max-[900px]:w-full flex flex-col bg-[#fafaf8] overflow-y-auto max-[900px]:overflow-y-visible flex-shrink-0'>
                 {/* Header */}
                 <div className='flex items-start justify-between p-6 max-[900px]:p-5 border-b border-[rgba(26,25,22,0.1)]'>
@@ -1279,7 +1228,7 @@ export default function Home() {
         <div className='mat-img relative overflow-hidden max-[900px]:h-[50vw]'>
           <Image
             src='/landing/material.jpeg'
-            alt='Materiał — stal nierdzewna'
+            alt='Materiał - stal nierdzewna'
             fill
             className='mat-img-inner'
           />
@@ -1333,7 +1282,7 @@ export default function Home() {
           </p>
           <div>
             <h2 className='text-[clamp(28px,3vw,46px)] font-light leading-[1.12] tracking-[-0.03em] text-[rgba(244,243,240,0.92)] mt-8 mb-5'>
-              Projektujemy na wymiar. Dosłownie.
+              Projektujemy na wymiar.
             </h2>
             <p className='text-[14px] font-normal leading-[1.75] text-[rgba(244,243,240,0.45)] max-w-[380px] mb-12'>
               Oferujemy indywidualne wymiarowanie, modyfikacje formy oraz
@@ -1364,349 +1313,18 @@ export default function Home() {
       </section>
 
       {/* CONTACT MODAL */}
-      <AnimatePresence>
-        {contactModalOpen && (
-          <motion.div
-            key='contact-backdrop'
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className='fixed inset-0 z-[600] flex items-end justify-center max-[900px]:items-end min-[901px]:items-center bg-[rgba(10,10,9,0.75)] backdrop-blur-[8px]'
-            onClick={closeContactModal}
-          >
-            <motion.div
-              key='contact-panel'
-              initial={{ opacity: 0, y: 40, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 24, scale: 0.98 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className='relative w-full max-w-[960px] max-h-[96dvh] flex max-[900px]:flex-col min-[901px]:flex-row overflow-hidden bg-[#f4f3f0] max-[900px]:rounded-t-2xl min-[901px]:rounded-none'
-              onClick={(e) => e.stopPropagation()}
-              onTouchStart={(e) => {
-                modalSwipeStartY.current = e.touches[0].clientY;
-              }}
-              onTouchEnd={(e) => {
-                if (modalSwipeStartY.current === null) return;
-                const dy =
-                  e.changedTouches[0].clientY - modalSwipeStartY.current;
-                modalSwipeStartY.current = null;
-                if (dy > 72) closeContactModal();
-              }}
-            >
-              {/* Mobile drag handle */}
-              <div className='hidden max-[900px]:flex absolute top-0 left-0 right-0 z-10 justify-center pt-2.5'>
-                <div className='modal-drag-handle mx-auto' />
-              </div>
-
-              {/* Close button */}
-              <button
-                onClick={closeContactModal}
-                className='absolute top-4 right-4 z-20 w-10 h-10 flex items-center justify-center text-[20px] text-[#6b6963] hover:text-[#1a1916] hover:bg-[rgba(26,25,22,0.06)] transition-all duration-200 bg-transparent border-0 cursor-pointer rounded-sm'
-                aria-label='Zamknij'
-              >
-                ×
-              </button>
-
-              {/* LEFT — dark info panel */}
-              <div className='bg-[#1a1916] flex flex-col justify-between px-10 py-12 max-[900px]:px-6 max-[900px]:py-10 max-[900px]:pt-14 min-[901px]:w-[300px] min-[901px]:shrink-0'>
-                <div>
-                  <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[rgba(244,243,240,0.3)] mb-8'>
-                    Kontakt
-                  </p>
-                  <h2 className='text-[clamp(22px,2.8vw,36px)] font-light leading-[1.12] tracking-[-0.03em] text-[rgba(244,243,240,0.92)] mb-4'>
-                    Zacznijmy tworzyć razem.
-                  </h2>
-                  <p className='text-[13px] font-normal leading-[1.75] text-[rgba(244,243,240,0.4)] max-[900px]:hidden'>
-                    Opisz projekt — odpiszemy w ciągu 24h z wyceną.
-                  </p>
-                </div>
-                <div className='mt-8 space-y-1 max-[900px]:hidden'>
-                  {[
-                    {
-                      label: "Email",
-                      value: "hello@hopla.studio",
-                      href: "mailto:hello@hopla.studio",
-                    },
-                    { label: "Instagram", value: "@hopla.studio", href: "#" },
-                    {
-                      label: "Lokalizacja",
-                      value: "Warszawa, Polska",
-                      href: null,
-                    },
-                  ].map(({ label, value, href }) => (
-                    <div
-                      key={label}
-                      className='flex justify-between items-center py-3 border-b border-[rgba(244,243,240,0.07)]'
-                    >
-                      <span className='text-[10px] tracking-[0.12em] uppercase text-[rgba(244,243,240,0.28)]'>
-                        {label}
-                      </span>
-                      {href ? (
-                        <a
-                          href={href}
-                          className='text-[12px] text-[rgba(244,243,240,0.6)] no-underline hover:text-[rgba(244,243,240,0.9)] transition-colors duration-150 flex items-center gap-1.5 group'
-                        >
-                          {" "}
-                          <MoveUpRight className='w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity' />
-                          {value}
-                        </a>
-                      ) : (
-                        <span className='text-[12px] text-[rgba(244,243,240,0.6)]'>
-                          {value}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* RIGHT — form */}
-              <div className='flex-1 overflow-y-auto bg-[#fafaf8] px-10 py-12 max-[900px]:px-6 max-[900px]:py-8'>
-                <AnimatePresence mode='wait'>
-                  {formState === "success" ? (
-                    <motion.div
-                      key='success'
-                      initial={{ opacity: 0, scale: 0.96 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                      className='flex flex-col items-center justify-center text-center py-16 gap-6 h-full'
-                    >
-                      <motion.div
-                        initial={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{
-                          delay: 0.1,
-                          duration: 0.6,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        className='w-16 h-16 rounded-full bg-[#1a1916] flex items-center justify-center'
-                      >
-                        <motion.svg
-                          width='24'
-                          height='24'
-                          viewBox='0 0 24 24'
-                          fill='none'
-                          stroke='#f4f3f0'
-                          strokeWidth='2'
-                          strokeLinecap='round'
-                          strokeLinejoin='round'
-                        >
-                          <motion.polyline
-                            points='20 6 9 17 4 12'
-                            initial={{ pathLength: 0 }}
-                            animate={{ pathLength: 1 }}
-                            transition={{
-                              delay: 0.4,
-                              duration: 0.5,
-                              ease: "easeOut",
-                            }}
-                          />
-                        </motion.svg>
-                      </motion.div>
-                      <motion.div
-                        initial={{ opacity: 0, y: 12 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.5, duration: 0.4 }}
-                      >
-                        <p className='text-[22px] font-light tracking-[-0.02em] text-[#1a1916] mb-2'>
-                          Wiadomość wysłana
-                        </p>
-                        <p className='text-[13px] font-normal leading-[1.7] text-[#6b6963]'>
-                          Odpiszemy w ciągu 24 godzin.
-                        </p>
-                      </motion.div>
-                      <motion.button
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.7, duration: 0.3 }}
-                        onClick={closeContactModal}
-                        className='text-[11px] font-medium tracking-[0.1em] uppercase text-[#b8b5b0] hover:text-[#1a1916] transition-colors duration-200 mt-1 bg-transparent border-0 cursor-pointer'
-                      >
-                        Zamknij →
-                      </motion.button>
-                    </motion.div>
-                  ) : (
-                    <motion.form
-                      key='form'
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.25 }}
-                      onSubmit={handleFormSubmit}
-                      className='flex flex-col gap-7'
-                    >
-                      <div>
-                        <p className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-3'>
-                          Temat zapytania
-                        </p>
-                        <div className='flex flex-wrap gap-2'>
-                          {[
-                            "Mebel na wymiar",
-                            "Projekt architektoniczny",
-                            "Współpraca",
-                            "Inne",
-                          ].map((topic) => (
-                            <button
-                              key={topic}
-                              type='button'
-                              onClick={() =>
-                                setFormTopic((t) =>
-                                  t === topic ? null : topic,
-                                )
-                              }
-                              className={`contact-topic-pill text-[11px] font-normal tracking-[0.08em] px-4 py-2 border transition-all duration-200 ${
-                                formTopic === topic
-                                  ? "bg-[#1a1916] text-[#f4f3f0] border-[#1a1916]"
-                                  : "bg-transparent text-[#6b6963] border-[rgba(26,25,22,0.15)] hover:border-[#1a1916] hover:text-[#1a1916]"
-                              }`}
-                            >
-                              {topic}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className='grid grid-cols-2 gap-6 max-[480px]:grid-cols-1'>
-                        <div className='contact-field-wrap'>
-                          <input
-                            type='text'
-                            name='name'
-                            id='cm-name'
-                            placeholder=' '
-                            required
-                            value={formData.name}
-                            onChange={handleFormChange}
-                            className='contact-field peer'
-                          />
-                          <label htmlFor='cm-name' className='contact-label'>
-                            Imię i nazwisko
-                          </label>
-                        </div>
-                        <div className='contact-field-wrap'>
-                          <input
-                            type='email'
-                            name='email'
-                            id='cm-email'
-                            placeholder=' '
-                            required
-                            value={formData.email}
-                            onChange={handleFormChange}
-                            className='contact-field peer'
-                          />
-                          <label htmlFor='cm-email' className='contact-label'>
-                            Adres email
-                          </label>
-                        </div>
-                      </div>
-
-                      <div className='contact-field-wrap'>
-                        <textarea
-                          name='message'
-                          id='cm-message'
-                          placeholder=' '
-                          required
-                          rows={4}
-                          value={formData.message}
-                          onChange={handleFormChange}
-                          className='contact-field peer resize-none'
-                        />
-                        <label htmlFor='cm-message' className='contact-label'>
-                          Opisz projekt
-                        </label>
-                      </div>
-
-                      <div className='flex items-center justify-between gap-4 max-[480px]:flex-col max-[480px]:items-start'>
-                        <p className='text-[11px] font-normal leading-[1.6] text-[#b8b5b0] max-w-[220px] max-[480px]:max-w-none'>
-                          Dane używane wyłącznie do kontaktu w sprawie projektu.
-                        </p>
-                        <button
-                          type='submit'
-                          disabled={formState === "sending"}
-                          className='contact-submit shrink-0 relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-8 overflow-hidden disabled:opacity-70 transition-opacity duration-200 max-[480px]:w-full max-[480px]:justify-center'
-                        >
-                          <AnimatePresence mode='wait'>
-                            {formState === "sending" ? (
-                              <motion.span
-                                key='sending'
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -8 }}
-                                className='flex items-center gap-2'
-                              >
-                                <span className='contact-spinner' />
-                                Wysyłanie…
-                              </motion.span>
-                            ) : (
-                              <motion.span
-                                key='idle'
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -8 }}
-                              >
-                                Wyślij wiadomość →
-                              </motion.span>
-                            )}
-                          </AnimatePresence>
-                        </button>
-                      </div>
-                    </motion.form>
-                  )}
-                </AnimatePresence>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <ContactModal
+        key={contactModalKey}
+        isOpen={contactModalOpen}
+        onClose={closeContactModal}
+      />
 
       {/* FOOTER */}
-      <footer
-        className='pt-16 px-10 pb-10 bg-[#f4f3f0] max-[900px]:px-6 max-[900px]:pt-12 max-[900px]:pb-32'
+      <SiteFooter
         id='kontakt'
-      >
-        <div className='grid grid-cols-[1.2fr_1fr_1fr_1fr] gap-12 pb-14 border-b border-[rgba(26,25,22,0.1)] mb-8 max-[900px]:grid-cols-2 max-[480px]:grid-cols-1 max-[900px]:gap-8'>
-          <div>
-            <a
-              href='#'
-              className='text-[13px] font-medium tracking-[0.06em] uppercase text-[#1a1916] block mb-3.5 no-underline'
-            >
-              Hopla <span className='text-[10px] font-normal'>studio</span>
-            </a>
-            <p className='text-[12px] font-normal leading-[1.7] text-[#6b6963]'>
-              Minimalistyczne obiekty stalowe
-              <br />
-              Projektowane i produkowane w Polsce
-            </p>
-          </div>
-          {FOOTER_COLS.map((col) => (
-            <div key={col.title}>
-              <span className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-5 block'>
-                {col.title}
-              </span>
-              {col.links.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className='block text-[13px] font-normal text-[#6b6963] no-underline leading-[2.2] transition-colors duration-[180ms] hover:text-[#1a1916]'
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          ))}
-        </div>
-        <div className='flex justify-between items-center max-[480px]:flex-col max-[480px]:items-start max-[480px]:gap-2'>
-          <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
-            © 2026 <span className='uppercase'>Hopla</span>{" "}
-            <span className='text-[9px] font-normal uppercase'>studio</span>.
-            Wszelkie prawa zastrzeżone.
-          </span>
-          <span className='text-[11px] font-normal text-[#b8b5b0] tracking-[0.04em]'>
-            Warszawa, Polska
-          </span>
-        </div>
-      </footer>
+        onContact={openContactModal}
+        mobileBottomPadding
+      />
       {/* MOBILE STICKY CTA BAR */}
       <AnimatePresence>
         {showStickyBar && (

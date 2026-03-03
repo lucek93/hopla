@@ -4,13 +4,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Hopla.studio",
   description:
-    "Stalowe meble o architektonicznej klarowności. Warszawa, Polska.",
+    "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
   keywords: [
     "meble stalowe",
     "hopla studio",
     "architektura",
     "minimalizm",
-    "warszawa",
+    "Rzeszów",
     "projektowanie",
     "stal nierdzewna",
     "rzemiosło",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hopla.studio",
     description:
-      "Stalowe meble o architektonicznej klarowności. Warszawa, Polska.",
+      "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
     type: "website",
     locale: "pl_PL",
     url: "https://hopla.studio/",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hopla.studio",
     description:
-      "Stalowe meble o architektonicznej klarowności. Warszawa, Polska.",
+      "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
   },
   metadataBase: new URL("https://hopla.studio/"),
 };
