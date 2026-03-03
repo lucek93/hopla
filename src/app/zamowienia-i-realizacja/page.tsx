@@ -349,7 +349,7 @@ export default function ZamowieniaPage() {
         {/* CTA - dark panel */}
         <section className='bg-[#1a1916] px-8 py-16 max-[480px]:px-5 max-[480px]:py-12'>
           <div className='max-w-[700px] mx-auto text-center'>
-            <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[#1a1916] mb-6'>
+            <p className='text-[10px] font-normal tracking-[0.14em] uppercase text-[rgba(244,243,240,0.35)] mb-6'>
               Dodatkowe informacje
             </p>
             <h2 className='text-[clamp(22px,3.5vw,36px)] font-light leading-[1.2] tracking-[-0.01em] text-[#f4f3f0] mb-5'>

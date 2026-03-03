@@ -7,6 +7,7 @@ const COLS = [
     title: "Studio",
     links: [
       { label: "Kolekcja", href: "/#kolekcja" },
+      { label: "Realizacje", href: "/realizacje" },
       { label: "O marce", href: "/o-marce" },
       { label: "Dla architektów", href: "/#architekci" },
     ],

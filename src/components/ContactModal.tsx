@@ -18,22 +18,58 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
   const [formState, setFormState] = useState<
     "idle" | "sending" | "success" | "error"
   >("idle");
+  const [formErrors, setFormErrors] = useState<{
+    email?: string;
+    message?: string;
+  }>({});
   const swipeStartY = useRef<number | null>(null);
 
   const handleFormChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (name === "email" || name === "message") {
+        setFormErrors((prev) => ({ ...prev, [name]: undefined }));
+      }
     },
     [],
   );
 
-  const handleFormSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormState("sending");
-    // TODO: replace with real API call
-    await new Promise((r) => setTimeout(r, 1600));
-    setFormState("success");
-  }, []);
+  const handleFormSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const errors: { email?: string; message?: string } = {};
+      if (!formData.email.trim()) errors.email = "Podaj adres email.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()))
+        errors.email = "Nieprawidłowy adres email.";
+      if (!formData.message.trim())
+        errors.message = "Treść wiadomości jest wymagana.";
+      if (Object.keys(errors).length > 0) {
+        setFormErrors(errors);
+        return;
+      }
+      setFormErrors({});
+      setFormState("sending");
+      try {
+        const res = await fetch("https://submit-form.com/HAESIou89", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({ ...formData, topic: formTopic ?? "" }),
+        });
+        if (res.ok) {
+          setFormState("success");
+        } else {
+          setFormState("error");
+        }
+      } catch {
+        setFormState("error");
+      }
+    },
+    [formData, formTopic],
+  );
 
   return (
     <AnimatePresence>
@@ -214,6 +250,7 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     onSubmit={handleFormSubmit}
                     className='flex flex-col gap-7'
                   >
+                    <input type='hidden' name='topic' value={formTopic ?? ""} />
                     <div>
                       <p className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#b8b5b0] mb-3'>
                         Temat zapytania
@@ -249,7 +286,6 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                           name='name'
                           id='contact-name'
                           placeholder=' '
-                          required
                           value={formData.name}
                           onChange={handleFormChange}
                           className='contact-field peer'
@@ -260,11 +296,10 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       </div>
                       <div className='contact-field-wrap'>
                         <input
-                          type='email'
+                          type='text'
                           name='email'
                           id='contact-email'
                           placeholder=' '
-                          required
                           value={formData.email}
                           onChange={handleFormChange}
                           className='contact-field peer'
@@ -275,6 +310,11 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                         >
                           Adres email*
                         </label>
+                        {formErrors.email && (
+                          <p className='mt-1.5 text-[11px] text-red-500 font-normal'>
+                            {formErrors.email}
+                          </p>
+                        )}
                       </div>
                     </div>
 
@@ -283,7 +323,6 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                         name='message'
                         id='contact-message'
                         placeholder=' '
-                        required
                         rows={4}
                         value={formData.message}
                         onChange={handleFormChange}
@@ -293,8 +332,13 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                         htmlFor='contact-message'
                         className='contact-label'
                       >
-                        Treść wiadomości:
+                        Treść wiadomości:*
                       </label>
+                      {formErrors.message && (
+                        <p className='mt-1.5 text-[11px] text-red-500 font-normal'>
+                          {formErrors.message}
+                        </p>
+                      )}
                     </div>
 
                     <div className='flex items-center justify-between gap-4 max-[480px]:flex-col max-[480px]:items-start'>
@@ -303,7 +347,9 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                       </p>
                       <button
                         type='submit'
-                        disabled={formState === "sending"}
+                        disabled={
+                          formState === "sending" || formState === "error"
+                        }
                         className='contact-submit shrink-0 relative inline-flex items-center gap-3 text-[11px] font-medium tracking-[0.1em] uppercase bg-[#1a1916] text-[#f4f3f0] py-4 px-8 overflow-hidden disabled:opacity-70 transition-opacity duration-200 max-[480px]:w-full max-[480px]:justify-center'
                       >
                         <AnimatePresence mode='wait'>
@@ -317,6 +363,16 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                             >
                               <span className='contact-spinner' />
                               Wysyłanie…
+                            </motion.span>
+                          ) : formState === "error" ? (
+                            <motion.span
+                              key='error'
+                              initial={{ opacity: 0, y: 8 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              exit={{ opacity: 0, y: -8 }}
+                              className='flex items-center gap-2'
+                            >
+                              Błąd — spróbuj ponownie
                             </motion.span>
                           ) : (
                             <motion.span
