@@ -106,9 +106,9 @@ export function ContactModal({ isOpen, onClose }: ContactModalProps) {
                     openInNewTab: true,
                   },
                   {
-                    label: "Lokalizacja",
-                    value: "Rzeszów, Polska",
-                    href: null,
+                    label: "Telefon",
+                    value: "+48 792 174 420",
+                    href: "tel:+48792174420",
                   },
                 ].map(({ label, value, href, openInNewTab }) => (
                   <div

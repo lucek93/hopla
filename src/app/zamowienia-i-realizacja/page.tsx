@@ -366,12 +366,12 @@ export default function ZamowieniaPage() {
               >
                 Napisz do nas
               </button>
-              <Link
+              {/* <Link
                 href='/'
                 className='inline-flex items-center gap-2 text-[12px] font-normal tracking-[0.1em] uppercase text-[#6b6963] no-underline hover:text-[#f4f3f0] transition-colors duration-200'
               >
                 ← Wróć na stronę główną
-              </Link>
+              </Link> */}
             </div>
           </div>
         </section>

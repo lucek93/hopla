@@ -612,6 +612,128 @@ a {
   }
 }
 
+/* ── TEXT SELECTION ── */
+::selection {
+  background: #1a1916;
+  color: #f4f3f0;
+}
+::-moz-selection {
+  background: #1a1916;
+  color: #f4f3f0;
+}
+
+/* ── CUSTOM SCROLLBAR ── */
+::-webkit-scrollbar {
+  width: 2px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 25, 22, 0.45);
+  border-radius: 0;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 25, 22, 0.8);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 25, 22, 0.45) transparent;
+}
+
+/* ── FONT FEATURE SETTINGS on headings ── */
+h1,
+h2,
+h3 {
+  font-feature-settings:
+    "kern" 1,
+    "liga" 1,
+    "calt" 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── GRAIN TEXTURE OVERLAY ── */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+/* ── GRADIENT SECTION DIVIDERS ── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(26, 25, 22, 0.14) 20%,
+    rgba(26, 25, 22, 0.14) 80%,
+    transparent
+  );
+  border: none;
+}
+
+/* ── NAV COMPACT ── */
+.nav-compact {
+  height: 52px !important;
+  background: rgba(244, 243, 240, 0.96) !important;
+  box-shadow: 0 1px 0 rgba(26, 25, 22, 0.08);
+}
+
+/* ── BUTTON ACTIVE PRESS (all devices) ── */
+button:not(:disabled):active,
+a:active {
+  transform: scale(0.97);
+  transition: transform 0.07s ease !important;
+}
+
+/* ── SCROLL PROGRESS refined ── */
+.scroll-progress {
+  height: 2px;
+  background: linear-gradient(to right, rgba(26, 25, 22, 0.3), #1a1916);
+  transition: width 0.06s linear;
+}
+
+/* ── STAT COUNTER ── */
+@keyframes count-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.stat-block {
+  opacity: 0;
+}
+.stat-block.on {
+  animation: count-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ── SECTION ENTER FADE ── */
+@keyframes section-fade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.section-enter {
+  opacity: 0;
+}
+.section-enter.on {
+  animation: section-fade 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 /* ── MODAL DRAG HANDLE ── */
 .modal-drag-handle {
   width: 36px;

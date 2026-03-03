@@ -208,6 +208,7 @@ export default function Home() {
   });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [navScrolled, setNavScrolled] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [contactModalKey, setContactModalKey] = useState(0);
 
@@ -320,6 +321,7 @@ export default function Home() {
         heroImgRef.current.style.transform = `translateY(${window.scrollY * 0.12}px)`;
       }
       setShowStickyBar(el.scrollTop > window.innerHeight * 0.55);
+      setNavScrolled(el.scrollTop > 60);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -360,26 +362,41 @@ export default function Home() {
     };
   }, []);
 
-  // Staggered scroll reveal
+  // Staggered scroll reveal + stat blocks + section enters
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            const siblings =
-              e.target.parentElement?.querySelectorAll(".sr:not(.on)");
-            let delay = 0;
-            siblings?.forEach((s, si) => {
-              if (s === e.target) delay = si * 90;
-            });
-            setTimeout(() => e.target.classList.add("on"), delay);
+            if (e.target.classList.contains("sr")) {
+              const siblings =
+                e.target.parentElement?.querySelectorAll(".sr:not(.on)");
+              let delay = 0;
+              siblings?.forEach((s, si) => {
+                if (s === e.target) delay = si * 90;
+              });
+              setTimeout(() => e.target.classList.add("on"), delay);
+            } else if (e.target.classList.contains("stat-block")) {
+              const siblings = e.target.parentElement?.querySelectorAll(
+                ".stat-block:not(.on)",
+              );
+              let delay = 0;
+              siblings?.forEach((s, si) => {
+                if (s === e.target) delay = si * 120;
+              });
+              setTimeout(() => e.target.classList.add("on"), delay);
+            } else {
+              e.target.classList.add("on");
+            }
             io.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.1 },
+      { threshold: 0.12 },
     );
-    document.querySelectorAll(".sr").forEach((el) => io.observe(el));
+    document
+      .querySelectorAll(".sr, .stat-block, .section-enter")
+      .forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, []);
 
@@ -404,6 +421,8 @@ export default function Home() {
 
   return (
     <>
+      {/* GRAIN TEXTURE */}
+      <div className='grain-overlay' aria-hidden='true' />
       {/* SCROLL PROGRESS BAR */}
       <div
         className='scroll-progress'
@@ -417,7 +436,9 @@ export default function Home() {
         aria-hidden='true'
       />
       {/* NAV */}
-      <nav className='fixed inset-x-0 top-0 z-[200] h-16 grid grid-cols-3 items-center px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-5'>
+      <nav
+        className={`fixed inset-x-0 top-0 z-[200] h-16 grid grid-cols-3 items-center px-10 bg-[rgba(244,243,240,0.88)] backdrop-blur-[16px] border-b border-[rgba(26,25,22,0.1)] max-[900px]:px-5 transition-all duration-300${navScrolled ? " nav-compact" : ""}`}
+      >
         {/* LEFT - desktop links / mobile hamburger */}
         <div className='flex items-center'>
           {/* Desktop links */}
@@ -726,12 +747,12 @@ export default function Home() {
 
       {/* COLLECTION */}
       <section className='border-b border-[rgba(26,25,22,0.1)]' id='kolekcja'>
-        <div className='flex items-baseline justify-between px-10 max-[900px]:px-5 pt-12 pb-8 border-b border-[rgba(26,25,22,0.1)]'>
+        <div className='section-enter flex items-baseline justify-between px-10 max-[900px]:px-5 pt-12 pb-8 border-b border-[rgba(26,25,22,0.1)]'>
           <span className='text-[11px] font-medium tracking-[0.14em] uppercase text-[#1a1916]'>
             Kolekcja
           </span>
           <div className='flex items-center gap-3'>
-            <span className='text-[12px] font-normal text-[#b8b5b0]'>
+            <span className='stat-block text-[12px] font-normal text-[#b8b5b0]'>
               {COLLECTION.length} obiektów
             </span>
           </div>
