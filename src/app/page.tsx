@@ -446,7 +446,7 @@ export default function Home() {
             {[
               { href: "#kolekcja", label: "Kolekcja" },
               { href: "#architekci", label: "Architekci" },
-              { href: "/realizacje", label: "Realizacje" },
+              // { href: "/realizacje", label: "Realizacje" },
               { href: "/o-marce", label: "O marce" },
             ].map((link) => (
               <li key={link.href}>
@@ -543,11 +543,11 @@ export default function Home() {
                     label: "Architekci",
                     sub: "Współpraca",
                   },
-                  {
-                    href: "/realizacje",
-                    label: "Realizacje",
-                    sub: "Zrealizowane projekty",
-                  },
+                  // {
+                  //   href: "/realizacje",
+                  //   label: "Realizacje",
+                  //   sub: "Zrealizowane projekty",
+                  // },
                   {
                     href: "/o-marce",
                     label: "O marce",
