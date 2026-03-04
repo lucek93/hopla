@@ -7,6 +7,8 @@ import { MoveUpRight } from "lucide-react";
 import { ContactModal } from "@/components/ContactModal";
 import { SiteFooter } from "@/components/SiteFooter";
 
+const MotionLink = motion(Link);
+
 const PILLS = [
   "Inżynieryjna precyzja",
   "Minimalistyczna geometria",
@@ -446,7 +448,6 @@ export default function Home() {
             {[
               { href: "#kolekcja", label: "Kolekcja" },
               { href: "#architekci", label: "Architekci" },
-              // { href: "/realizacje", label: "Realizacje" },
               { href: "/o-marce", label: "O marce" },
             ].map((link) => (
               <li key={link.href}>
@@ -536,7 +537,7 @@ export default function Home() {
 
               {/* Drawer links */}
               <nav className='flex flex-col flex-1 px-6 pt-8 pb-10 gap-0'>
-                {[
+                {/* {[
                   { href: "#kolekcja", label: "Kolekcja", sub: "8 obiektów" },
                   {
                     href: "#architekci",
@@ -579,6 +580,46 @@ export default function Home() {
                       →
                     </span>
                   </motion.a>
+                ))} */}
+
+                {[
+                  { href: "#kolekcja", label: "Kolekcja", sub: "8 obiektów" },
+                  {
+                    href: "#architekci",
+                    label: "Architekci",
+                    sub: "Współpraca",
+                  },
+                  {
+                    href: "/o-marce",
+                    label: "O marce",
+                    sub: "Historia i filozofia",
+                  },
+                ].map((link, i) => (
+                  <MotionLink
+                    key={link.href}
+                    href={link.href}
+                    onClick={closeMobileMenu}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{
+                      delay: 0.12 + i * 0.07,
+                      duration: 0.5,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className='flex items-center justify-between py-5 border-b border-[rgba(26,25,22,0.08)] no-underline group'
+                  >
+                    <div>
+                      <span className='block text-[18px] font-light tracking-[-0.02em] text-[#1a1916] group-hover:font-normal transition-all duration-200'>
+                        {link.label}
+                      </span>
+                      <span className='block text-[11px] font-normal tracking-[0.06em] text-[#b8b5b0] mt-0.5'>
+                        {link.sub}
+                      </span>
+                    </div>
+                    <span className='text-[16px] text-[#b8b5b0] group-hover:text-[#1a1916] group-hover:translate-x-1 transition-all duration-200'>
+                      →
+                    </span>
+                  </MotionLink>
                 ))}
 
                 {/* Spacer */}

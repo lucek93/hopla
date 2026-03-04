@@ -88,17 +88,38 @@ export function SiteFooter({
             <span className='text-[10px] font-medium tracking-[0.14em] uppercase text-[#6b6963] mb-5 block'>
               {col.title}
             </span>
-            {col.links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target={link.openInNewTab ? "_blank" : undefined}
-                rel={link.openInNewTab ? "noopener noreferrer" : undefined}
-                className='block text-[13px] font-normal text-[#1a1916] no-underline leading-[2.3] transition-colors duration-[180ms] hover:text-[#6b6963]'
-              >
-                {link.label}
-              </a>
-            ))}
+
+            {col.links.map((link) => {
+              const isExternal =
+                link.href.startsWith("http") ||
+                link.href.startsWith("mailto:") ||
+                link.href.startsWith("tel:");
+
+              const className =
+                "block text-[13px] font-normal text-[#1a1916] no-underline leading-[2.3] transition-colors duration-[180ms] hover:text-[#6b6963]";
+
+              // 🔹 Link zewnętrzny / mail / tel
+              if (isExternal) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.openInNewTab ? "_blank" : undefined}
+                    rel={link.openInNewTab ? "noopener noreferrer" : undefined}
+                    className={className}
+                  >
+                    {link.label}
+                  </a>
+                );
+              }
+
+              // 🔹 Link wewnętrzny (Next routing)
+              return (
+                <Link key={link.label} href={link.href} className={className}>
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
         ))}
       </div>
