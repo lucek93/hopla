@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Hopla.studio",
+  title: "HOPLA studio",
   description:
     "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
   keywords: [
     "meble stalowe",
-    "hopla studio",
+    "HOPLA studio",
     "architektura",
     "minimalizm",
     "Rzeszów",
@@ -17,21 +17,21 @@ export const metadata: Metadata = {
     "kolekcja mebli",
   ],
   openGraph: {
-    title: "Hopla.studio",
+    title: "HOPLA studio",
     description:
       "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
     type: "website",
     locale: "pl_PL",
-    url: "https://hopla.studio/",
-    siteName: "Hopla.studio",
+    url: "https://hoplastudio.cc/",
+    siteName: "HOPLA studio",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hopla.studio",
+    title: "HOPLA studio",
     description:
       "Stalowe meble o architektonicznej klarowności. Rzeszów, Polska.",
   },
-  metadataBase: new URL("https://hopla.studio/"),
+  metadataBase: new URL("https://hoplastudio.cc/"),
 };
 
 export default function RootLayout({
